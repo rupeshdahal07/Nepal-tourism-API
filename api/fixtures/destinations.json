@@ -1,0 +1,422 @@
+[
+    {
+      "model": "api.destination",
+      "pk": "everest-base-camp",
+      "fields": {
+        "name": "Everest Base Camp",
+        "type": "trek",
+        "region": "Khumbu",
+        "description": "The classic trek to the foot of the world's highest mountain",
+        "difficulty": "hard",
+        "duration": 14,
+        "max_elevation": 5545,
+        "min_elevation": 2800,
+        "latitude": 28.0025,
+        "longitude": 86.8528,
+        "best_season": ["March", "April", "May", "September", "October", "November"],
+        "permits_required": ["Sagarmatha National Park Permit", "TIMS"],
+        "highlights": ["Kala Patthar", "Namche Bazaar", "Tengboche Monastery"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "annapurna-circuit",
+      "fields": {
+        "name": "Annapurna Circuit",
+        "type": "trek",
+        "region": "Annapurna",
+        "description": "A diverse trek around the Annapurna massif",
+        "difficulty": "moderate",
+        "duration": 12,
+        "max_elevation": 5416,
+        "min_elevation": 760,
+        "latitude": 28.7041,
+        "longitude": 83.9144,
+        "best_season": ["March", "April", "October", "November"],
+        "permits_required": ["ACAP", "TIMS"],
+        "highlights": ["Thorong La Pass", "Poon Hill", "Tilicho Lake"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "langtang-valley",
+      "fields": {
+        "name": "Langtang Valley",
+        "type": "trek",
+        "region": "Langtang",
+        "description": "A spectacular trek in the Langtang National Park",
+        "difficulty": "moderate",
+        "duration": 7,
+        "max_elevation": 3800,
+        "min_elevation": 1400,
+        "latitude": 28.2139,
+        "longitude": 85.6178,
+        "best_season": ["March", "April", "May", "October", "November"],
+        "permits_required": ["Langtang National Park Permit", "TIMS"],
+        "highlights": ["Kyanjin Gompa", "Tserko Ri", "Langtang Village"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "manaslu-circuit",
+      "fields": {
+        "name": "Manaslu Circuit",
+        "type": "trek",
+        "region": "Manaslu",
+        "description": "A remote trek around the world's eighth highest mountain",
+        "difficulty": "hard",
+        "duration": 16,
+        "max_elevation": 5160,
+        "min_elevation": 700,
+        "latitude": 28.5500,
+        "longitude": 84.5600,
+        "best_season": ["March", "April", "October", "November"],
+        "permits_required": ["Manaslu Restricted Area Permit", "ACAP", "TIMS"],
+        "highlights": ["Larkya La Pass", "Samagaon", "Pungyen Gompa"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "upper-mustang",
+      "fields": {
+        "name": "Upper Mustang",
+        "type": "trek",
+        "region": "Mustang",
+        "description": "A journey to the ancient walled kingdom of Lo",
+        "difficulty": "moderate",
+        "duration": 10,
+        "max_elevation": 4230,
+        "min_elevation": 2800,
+        "latitude": 29.1892,
+        "longitude": 83.9756,
+        "best_season": ["April", "May", "June", "July", "August", "September", "October"],
+        "permits_required": ["Upper Mustang Restricted Area Permit", "ACAP"],
+        "highlights": ["Lo Manthang", "Chhoser Caves", "Mustang Palace"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "poon-hill",
+      "fields": {
+        "name": "Poon Hill Trek",
+        "type": "trek",
+        "region": "Annapurna",
+        "description": "A short trek with panoramic Himalayan views",
+        "difficulty": "easy",
+        "duration": 5,
+        "max_elevation": 3210,
+        "min_elevation": 1070,
+        "latitude": 28.4007,
+        "longitude": 83.6838,
+        "best_season": ["March", "April", "May", "October", "November", "December"],
+        "permits_required": ["ACAP", "TIMS"],
+        "highlights": ["Poon Hill Sunrise", "Ghorepani Village", "Rhododendron Forests"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "kathmandu-valley",
+      "fields": {
+        "name": "Kathmandu Valley",
+        "type": "cultural",
+        "region": "Bagmati",
+        "description": "The cultural heartland of Nepal with numerous UNESCO World Heritage sites",
+        "difficulty": "easy",
+        "duration": 3,
+        "max_elevation": 2175,
+        "min_elevation": 1300,
+        "latitude": 27.7172,
+        "longitude": 85.3240,
+        "best_season": ["All year"],
+        "permits_required": [],
+        "highlights": ["Pashupatinath Temple", "Swayambhunath Stupa", "Kathmandu Durbar Square", "Bhaktapur"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "chitwan-national-park",
+      "fields": {
+        "name": "Chitwan National Park",
+        "type": "wildlife",
+        "region": "Terai",
+        "description": "Nepal's first national park with rich wildlife including Bengal tigers and rhinos",
+        "difficulty": "easy",
+        "duration": 3,
+        "max_elevation": 815,
+        "min_elevation": 150,
+        "latitude": 27.5142,
+        "longitude": 84.4504,
+        "best_season": ["October", "November", "December", "January", "February", "March", "April"],
+        "permits_required": ["Chitwan National Park Entry Permit"],
+        "highlights": ["Jungle Safari", "Elephant Breeding Center", "Tharu Cultural Show"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "lumbini",
+      "fields": {
+        "name": "Lumbini",
+        "type": "cultural",
+        "region": "Lumbini",
+        "description": "The birthplace of Lord Buddha and a sacred pilgrimage site",
+        "difficulty": "easy",
+        "duration": 2,
+        "max_elevation": 150,
+        "min_elevation": 100,
+        "latitude": 27.4833,
+        "longitude": 83.2766,
+        "best_season": ["All year"],
+        "permits_required": [],
+        "highlights": ["Maya Devi Temple", "World Peace Pagoda", "Monastic Zone"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "three-passes-trek",
+      "fields": {
+        "name": "Three Passes Trek",
+        "type": "trek",
+        "region": "Khumbu",
+        "description": "A challenging trek crossing three high passes in the Everest region",
+        "difficulty": "very-hard",
+        "duration": 18,
+        "max_elevation": 5535,
+        "min_elevation": 2800,
+        "latitude": 27.9881,
+        "longitude": 86.9250,
+        "best_season": ["March", "April", "May", "October", "November"],
+        "permits_required": ["Sagarmatha National Park Permit", "TIMS"],
+        "highlights": ["Kongma La", "Cho La", "Renjo La", "Gokyo Lakes"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "annapurna-base-camp",
+      "fields": {
+        "name": "Annapurna Base Camp",
+        "type": "trek",
+        "region": "Annapurna",
+        "description": "A trek to the amphitheater of the Annapurna sanctuary",
+        "difficulty": "moderate",
+        "duration": 10,
+        "max_elevation": 4130,
+        "min_elevation": 1070,
+        "latitude": 28.5311,
+        "longitude": 83.8800,
+        "best_season": ["March", "April", "May", "October", "November"],
+        "permits_required": ["ACAP", "TIMS"],
+        "highlights": ["Annapurna Sanctuary", "Machapuchare Base Camp", "Bamboo Forest"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "pokhara",
+      "fields": {
+        "name": "Pokhara",
+        "type": "leisure",
+        "region": "Gandaki",
+        "description": "A serene lakeside city with stunning mountain views",
+        "difficulty": "easy",
+        "duration": 3,
+        "max_elevation": 1400,
+        "min_elevation": 800,
+        "latitude": 28.2096,
+        "longitude": 83.9856,
+        "best_season": ["All year"],
+        "permits_required": [],
+        "highlights": ["Phewa Lake", "Peace Pagoda", "Davis Falls", "Sarangkot"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "rara-lake",
+      "fields": {
+        "name": "Rara Lake",
+        "type": "trek",
+        "region": "Karnali",
+        "description": "Trek to the largest lake in Nepal in remote western Nepal",
+        "difficulty": "moderate",
+        "duration": 9,
+        "max_elevation": 3060,
+        "min_elevation": 1550,
+        "latitude": 29.5239,
+        "longitude": 82.0911,
+        "best_season": ["April", "May", "September", "October", "November"],
+        "permits_required": ["Rara National Park Permit", "TIMS"],
+        "highlights": ["Rara Lake", "Alpine Forests", "Remote Villages"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "dhaulagiri-circuit",
+      "fields": {
+        "name": "Dhaulagiri Circuit",
+        "type": "trek",
+        "region": "Dhaulagiri",
+        "description": "A challenging trek around the seventh highest mountain in the world",
+        "difficulty": "very-hard",
+        "duration": 20,
+        "max_elevation": 5360,
+        "min_elevation": 800,
+        "latitude": 28.6980,
+        "longitude": 83.4875,
+        "best_season": ["April", "May", "September", "October"],
+        "permits_required": ["ACAP", "TIMS"],
+        "highlights": ["French Pass", "Dhaulagiri Base Camp", "Hidden Valley"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "kanchenjunga-base-camp",
+      "fields": {
+        "name": "Kanchenjunga Base Camp",
+        "type": "trek",
+        "region": "Kanchenjunga",
+        "description": "Trek to the base of the world's third highest mountain",
+        "difficulty": "very-hard",
+        "duration": 21,
+        "max_elevation": 5140,
+        "min_elevation": 1200,
+        "latitude": 27.7028,
+        "longitude": 88.1475,
+        "best_season": ["March", "April", "May", "October", "November"],
+        "permits_required": ["Kanchenjunga Conservation Area Permit", "Restricted Area Permit", "TIMS"],
+        "highlights": ["North Base Camp", "South Base Camp", "Remote Villages", "Yalung Glacier"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "nagarkot",
+      "fields": {
+        "name": "Nagarkot",
+        "type": "leisure",
+        "region": "Bagmati",
+        "description": "A hill station famous for sunrise and sunset views of the Himalayas",
+        "difficulty": "easy",
+        "duration": 1,
+        "max_elevation": 2175,
+        "min_elevation": 1950,
+        "latitude": 27.7127,
+        "longitude": 85.5311,
+        "best_season": ["October", "November", "December", "January", "February", "March", "April"],
+        "permits_required": [],
+        "highlights": ["Himalayan Panorama", "Sunrise View", "Nagarkot Tower"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "dolpo",
+      "fields": {
+        "name": "Dolpo Region",
+        "type": "trek",
+        "region": "Dolpo",
+        "description": "A remote trek in the rain shadow area of the Himalayas",
+        "difficulty": "hard",
+        "duration": 16,
+        "max_elevation": 5360,
+        "min_elevation": 1650,
+        "latitude": 29.0133,
+        "longitude": 83.0014,
+        "best_season": ["May", "June", "September", "October"],
+        "permits_required": ["Upper Dolpo Restricted Area Permit", "Shey Phoksundo National Park Permit", "TIMS"],
+        "highlights": ["Shey Phoksundo Lake", "Crystal Mountain", "Remote Tibetan Culture"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "gosaikunda-lake",
+      "fields": {
+        "name": "Gosaikunda Lake",
+        "type": "trek",
+        "region": "Langtang",
+        "description": "A sacred alpine lake trek in the Langtang region",
+        "difficulty": "moderate",
+        "duration": 6,
+        "max_elevation": 4380,
+        "min_elevation": 1400,
+        "latitude": 28.0843,
+        "longitude": 85.4167,
+        "best_season": ["March", "April", "May", "September", "October", "November"],
+        "permits_required": ["Langtang National Park Permit", "TIMS"],
+        "highlights": ["Gosaikunda Lake", "Lauribina Pass", "Helambu Villages"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "bardia-national-park",
+      "fields": {
+        "name": "Bardia National Park",
+        "type": "wildlife",
+        "region": "Terai",
+        "description": "Nepal's largest wilderness area with pristine wildlife",
+        "difficulty": "easy",
+        "duration": 3,
+        "max_elevation": 320,
+        "min_elevation": 152,
+        "latitude": 28.3665,
+        "longitude": 81.5776,
+        "best_season": ["October", "November", "December", "January", "February", "March", "April"],
+        "permits_required": ["Bardia National Park Entry Permit"],
+        "highlights": ["Wildlife Safari", "Tiger Tracking", "Tharu Culture"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "api.destination",
+      "pk": "bandipur",
+      "fields": {
+        "name": "Bandipur",
+        "type": "cultural",
+        "region": "Gandaki",
+        "description": "A living museum of Newari culture on a hilltop",
+        "difficulty": "easy",
+        "duration": 2,
+        "max_elevation": 1030,
+        "min_elevation": 800,
+        "latitude": 27.9400,
+        "longitude": 84.4070,
+        "best_season": ["All year"],
+        "permits_required": [],
+        "highlights": ["Traditional Architecture", "Tundikhel", "Siddha Cave", "Himalayan Views"],
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    }
+  ]

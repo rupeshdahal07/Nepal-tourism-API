@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepal Tourism - Destinations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Alpine.js for reactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Custom Tailwind config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nepal: {
+                            red: '#DC143C',
+                            blue: '#003893'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen" x-data="destinationsApp()">
+    <!-- Header -->
+    <header class="bg-nepal-blue text-white shadow-md">
+        <div class="container mx-auto px-4 py-6 flex flex-col md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center justify-between mb-4 md:mb-0">
+                <h1 class="text-2xl font-bold flex items-center">
+                    <svg class="w-8 h-8 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 3L12 9L6 3H4V21H6V8L12 14L18 8V21H20V3H18Z" fill="currentColor"/>
+                    </svg>
+                    Nepal Tourism
+                </h1>
+            </div>
+            <nav class="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-6">
+                <a href="#" class="hover:text-nepal-red font-semibold">Home</a>
+                <a href="#" class="hover:text-nepal-red font-semibold bg-nepal-red bg-opacity-20 px-3 py-1 rounded">Destinations</a>
+                <a href="#" class="hover:text-nepal-red font-semibold">Weather</a>
+                <a href="#" class="hover:text-nepal-red font-semibold">Trails</a>
+                <a href="#" class="hover:text-nepal-red font-semibold">About</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Search and Filter Controls -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="w-full md:w-1/3">
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <input 
+                        type="text" 
+                        id="search" 
+                        x-model="searchTerm" 
+                        @input="loadDestinations()"
+                        placeholder="Search destinations..." 
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-nepal-blue"
+                    >
+                </div>
+                
+                <div class="w-full md:w-1/4">
+                    <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select 
+                        id="type" 
+                        x-model="selectedType" 
+                        @change="loadDestinations()"
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-nepal-blue"
+                    >
+                        <option value="">All Types</option>
+                        <option value="trek">Trek</option>
+                        <option value="heritage">Heritage</option>
+                        <option value="cultural">Cultural</option>
+                        <option value="wildlife">Wildlife</option>
+                        <option value="leisure">Leisure</option>
+                    </select>
+                </div>
+                
+                <div class="w-full md:w-1/4">
+                    <label for="region" class="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                    <select 
+                        id="region" 
+                        x-model="selectedRegion" 
+                        @change="loadDestinations()"
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-nepal-blue"
+                    >
+                        <option value="">All Regions</option>
+                        <template x-for="region in regions" :key="region">
+                            <option :value="region" x-text="region"></option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="flex justify-center py-12">
+            <svg class="animate-spin h-10 w-10 text-nepal-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <!-- Destinations Grid -->
+        <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <template x-for="destination in destinations" :key="destination.id">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <!-- Destination Image -->
+                    <div class="h-48 bg-gray-300 relative">
+                        <div x-show="destination.photos && destination.photos.length > 0" class="w-full h-full">
+                            <img 
+                                :src="destination.photos && destination.photos.length > 0 ? destination.photos[0].photo : ''" 
+                                :alt="destination.name"
+                                class="w-full h-full object-cover"
+                                @error="$event.target.src = 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'"
+                            >
+                        </div>
+                        <div x-show="!destination.photos || destination.photos.length === 0" class="w-full h-full bg-gray-300 flex items-center justify-center">
+                            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="absolute top-0 right-0 bg-nepal-blue text-white text-xs font-bold py-1 px-3 rounded-bl-lg" x-text="destination.type"></div>
+                    </div>
+                    
+                    <!-- Destination Content -->
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-xl font-bold text-gray-800" x-text="destination.name"></h2>
+                            <span class="text-sm font-medium text-nepal-blue" x-text="destination.region"></span>
+                        </div>
+                        
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2" x-text="destination.description"></p>
+                        
+                        <!-- Details -->
+                        <div class="grid grid-cols-2 gap-2 mb-4 text-sm">
+                            <div x-show="destination.difficulty" class="flex items-center">
+                                <svg class="w-4 h-4 text-gray-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                <span x-text="'Difficulty: ' + (destination.difficulty || 'N/A')"></span>
+                            </div>
+                            
+                            <div x-show="destination.duration" class="flex items-center">
+                                <svg class="w-4 h-4 text-gray-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span x-text="destination.duration ? destination.duration + ' days' : 'N/A'"></span>
+                            </div>
+                            
+                            <div x-show="destination.elevation && destination.elevation.max" class="flex items-center">
+                                <svg class="w-4 h-4 text-gray-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <span x-text="destination.elevation && destination.elevation.max ? destination.elevation.max + 'm' : 'N/A'"></span>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 text-gray-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                </svg>
+                                <span x-text="destination.best_season ? destination.best_season.join(', ') : 'All year'"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Permits -->
+                        <div x-show="destination.permits_required && destination.permits_required.length > 0" class="mb-4">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-1">Required Permits:</h3>
+                            <div class="flex flex-wrap gap-1">
+                                <template x-for="permit in destination.permits_required" :key="permit">
+                                    <span class="inline-block bg-gray-200 text-xs rounded px-2 py-1" x-text="permit"></span>
+                                </template>
+                            </div>
+                        </div>
+                        
+                        <!-- View Details Button -->
+                        <div class="flex justify-end">
+                            <button 
+                                @click="viewDestinationDetails(destination)"
+                                class="bg-nepal-blue hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center"
+                            >
+                                View Details
+                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Empty State -->
+        <div x-show="!loading && destinations.length === 0" class="bg-white rounded-lg shadow-md p-8 text-center">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-700 mb-1">No destinations found</h3>
+            <p class="text-gray-500">Try adjusting your search or filters</p>
+        </div>
+
+        <!-- Destination Details Modal -->
+        <div 
+            x-show="showModal" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 overflow-y-auto" 
+            style="display: none;"
+        >
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div 
+                    x-show="showModal" 
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    @click="showModal = false" 
+                    class="fixed inset-0 transition-opacity"
+                >
+                    <div class="absolute inset-0 bg-gray-800 opacity-75"></div>
+                </div>
+
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+
+                <div 
+                    x-show="showModal" 
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+                >
+                    <!-- Modal Content -->
+                    <div class="bg-white">
+                        <!-- Modal Header -->
+                        <div class="px-6 py-4 border-b">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-2xl font-semibold text-gray-800" x-text="selectedDestination.name"></h3>
+                                <button @click="showModal = false" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="px-6 py-4">
+                            <!-- Image Gallery -->
+                            <div x-show="selectedDestination.photos && selectedDestination.photos.length > 0" class="mb-6">
+                                <img 
+                                    :src="selectedDestination.photos && selectedDestination.photos.length > 0 ? selectedDestination.photos[0].photo : ''"
+                                    :alt="selectedDestination.name"
+                                    class="w-full h-64 object-cover rounded-lg"
+                                    @error="$event.target.src='https://images.unsplash.com/photo-1544735716-392fe2489ffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60'"
+                                >
+                            </div>
+
+                            <!-- Destination Info -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                <!-- Left Column: Details -->
+                                <div class="md:col-span-2">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-2">About</h4>
+                                    <p class="text-gray-600 mb-4" x-text="selectedDestination.description"></p>
+                                    
+                                    <div x-show="selectedDestination.highlights && selectedDestination.highlights.length > 0">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Highlights</h4>
+                                        <ul class="list-disc list-inside mb-4">
+                                            <template x-for="highlight in selectedDestination.highlights" :key="highlight">
+                                                <li class="text-gray-600" x-text="highlight"></li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div x-show="selectedDestination.permits_required && selectedDestination.permits_required.length > 0">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Required Permits</h4>
+                                        <ul class="list-disc list-inside mb-4">
+                                            <template x-for="permit in selectedDestination.permits_required" :key="permit">
+                                                <li class="text-gray-600" x-text="permit"></li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right Column: Quick Facts -->
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Quick Facts</h4>
+                                    
+                                    <div class="space-y-3">
+                                        <div class="flex items-start">
+                                            <svg class="w-5 h-5 text-nepal-blue mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-700">Region</p>
+                                                <p class="text-sm text-gray-600" x-text="selectedDestination.region || 'N/A'"></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <svg class="w-5 h-5 text-nepal-blue mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                            </svg>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-700">Difficulty</p>
+                                                <p class="text-sm text-gray-600" x-text="selectedDestination.difficulty || 'N/A'"></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <svg class="w-5 h-5 text-nepal-blue mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-700">Duration</p>
+                                                <p class="text-sm text-gray-600" x-text="selectedDestination.duration ? selectedDestination.duration + ' days' : 'N/A'"></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <svg class="w-5 h-5 text-nepal-blue mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                            </svg>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-700">Elevation</p>
+                                                <p class="text-sm text-gray-600" x-text="selectedDestination.elevation ? (selectedDestination.elevation.min + 'm - ' + selectedDestination.elevation.max + 'm') : 'N/A'"></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <svg class="w-5 h-5 text-nepal-blue mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                            </svg>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-700">Best Season</p>
+                                                <p class="text-sm text-gray-600" x-text="selectedDestination.best_season ? selectedDestination.best_season.join(', ') : 'All year'"></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div x-show="selectedDestination.coordinates" class="flex items-start">
+                                            <svg class="w-5 h-5 text-nepal-blue mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                                            </svg>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-700">Coordinates</p>
+                                                <p class="text-sm text-gray-600" x-text="selectedDestination.coordinates ? (selectedDestination.coordinates.lat + ', ' + selectedDestination.coordinates.lng) : 'N/A'"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Weather Section (placeholder) -->
+                            <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-2">Weather Information</h4>
+                                <p class="text-gray-600">Weather data is available through our API at <code>/api/v1/weather/</code> endpoint.</p>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="px-6 py-4 bg-gray-50 border-t flex justify-between">
+                            <button @click="showModal = false" class="px-4 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors duration-300">
+                                Close
+                            </button>
+                            <a href="#" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                                </svg>
+                                Book a Trip
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-nepal-blue text-white mt-12">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Nepal Tourism API</h3>
+                    <p class="text-gray-300">Comprehensive data on Nepal's tourist destinations, weather, trails, and more.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">API Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/api/docs/" class="text-gray-300 hover:text-white">API Documentation</a></li>
+                        <li><a href="/api/redoc/" class="text-gray-300 hover:text-white">ReDoc Documentation</a></li>
+                        <li><a href="/api/v1/" class="text-gray-300 hover:text-white">API Endpoints</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Categories</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-white">Destinations</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Trekking Routes</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Weather Data</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Lodging Options</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                    <p class="text-gray-300">info@nepaltourismapi.com</p>
+                    <p class="text-gray-300">+977 1 XXXX XXX</p>
+                    <div class="mt-4 flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white">
+                            <span class="sr-only">Twitter</span>
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white">
+                            <span class="sr-only">GitHub</span>
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-gray-700 text-center">
+                <p class="text-gray-300">&copy; 2025 Nepal Tourism API. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alpine.js Data -->
+    <script>
+        function destinationsApp() {
+            return {
+                apiUrl: '/api/v1/destinations/',
+                destinations: [],
+                regions: [],
+                selectedDestination: {},
+                searchTerm: '',
+                selectedType: '',
+                selectedRegion: '',
+                loading: true,
+                showModal: false,
+                
+                init() {
+                    this.loadDestinations();
+                },
+                
+                loadDestinations() {
+                    this.loading = true;
+                    
+                    // Build query parameters
+                    let params = new URLSearchParams();
+                    if (this.searchTerm) params.append('search', this.searchTerm);
+                    if (this.selectedType) params.append('type', this.selectedType);
+                    if (this.selectedRegion) params.append('region', this.selectedRegion);
+                    
+                    const url = this.apiUrl + '?' + params.toString();
+                    
+                    axios.get(url)
+                        .then(response => {
+                            this.destinations = response.data;
+                            this.extractRegions();
+                            this.loading = false;
+                        })
+                        .catch(error => {
+                            console.error('Error loading destinations:', error);
+                            this.loading = false;
+                        });
+                },
+                
+                extractRegions() {
+                    // Extract unique regions from destinations
+                    const regionSet = new Set();
+                    this.destinations.forEach(dest => {
+                        if (dest.region) regionSet.add(dest.region);
+                    });
+                    this.regions = Array.from(regionSet).sort();
+                },
+                
+                viewDestinationDetails(destination) {
+                    this.selectedDestination = destination;
+                    this.showModal = true;
+                }
+            };
+        }
+    </script>
+</body>
+</html>
