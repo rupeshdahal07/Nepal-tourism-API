@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepal Tourism - Weather</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Alpine.js for reactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Custom Tailwind config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nepal: {
+                            red: '#DC143C',
+                            blue: '#003893'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen" x-data="weatherApp()">
+<!-- Modern Navbar -->
+<header class="bg-nepal-blue text-white sticky top-0 z-40">
+    <div class="container mx-auto px-4">
+        <!-- Top nav section with logo -->
+        <div class="flex items-center justify-between h-16">
+            <!-- Logo -->
+            <a href="/" class="flex items-center space-x-2">
+                <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 3L12 9L6 3H4V21H6V8L12 14L18 8V21H20V3H18Z" fill="currentColor"/>
+                </svg>
+                <span class="font-bold text-xl tracking-tight">Nepal Tourism</span>
+            </a>
+            
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="text-white hover:text-nepal-red focus:outline-none">
+                    <svg class="h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg class="h-6 w-6" x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Desktop nav links -->
+            <nav class="hidden md:flex md:items-center md:space-x-8">
+                <a href="/" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Home</a>
+                <a href="/destinations" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Destinations</a>
+                <a href="/weather" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 border-b-2 border-nepal-red pb-1">Weather</a>
+                <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Trails</a>
+                <div class="relative group">
+                    <button class="flex items-center hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">
+                        Info
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">About Nepal</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Travel Guide</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">FAQ</a>
+                    </div>
+                </div>
+                <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">API Docs</a>
+            </nav>
+        </div>
+        
+        <!-- Mobile nav links -->
+        <div class="md:hidden transition-all duration-300 ease-in-out max-h-0 overflow-hidden" :class="{'max-h-96': mobileMenuOpen, 'max-h-0': !mobileMenuOpen}" x-data="{ mobileMenuOpen: false }">
+            <nav class="flex flex-col space-y-3 pb-3">
+                <a href="/" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Home</a>
+                <a href="/destinations" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Destinations</a>
+                <a href="/weather" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Weather</a>
+                <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Trails</a>
+                <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">About Nepal</a>
+                <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Travel Guide</a>
+                <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm inline-block w-fit">API Docs</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<!-- Hero Banner -->
+<div class="relative bg-nepal-blue py-16">
+    <div class="absolute inset-0 opacity-20">
+        <img src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?ixlib=rb-1.2.1&auto=format&fit=crop&q=80"  alt="" class="w-full h-full object-cover">
+    </div>
+    <div class="container mx-auto px-4 relative z-10">
+        <h1 class="text-4xl font-bold text-white mb-4">Nepal Weather Information</h1>
+        <p class="text-xl text-white/90 max-w-3xl">Get real-time weather data for major locations across Nepal, including mountain elevations and 7-day forecasts.</p>
+    </div>
+</div>
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-8">
+    <!-- Location Selection and Elevation Input -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="w-full md:w-1/2">
+                <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Select Location</label>
+                <select 
+                    id="location"
+                    x-model="selectedLocation"
+                    @change="loadWeatherData()"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-nepal-blue"
+                >
+                    <option value="">Select a location</option>
+                    <option value="Kathmandu">Kathmandu</option>
+                    <option value="Pokhara">Pokhara</option>
+                    <option value="Namche Bazaar">Namche Bazaar</option>
+                    <option value="Lukla">Lukla</option>
+                    <option value="Chitwan">Chitwan</option>
+                    <option value="Nagarkot">Nagarkot</option>
+                    <option value="Lumbini">Lumbini</option>
+                    <option value="Annapurna Base Camp">Annapurna Base Camp</option>
+                    <option value="Everest Base Camp">Everest Base Camp</option>
+                </select>
+            </div>
+            
+            <div class="w-full md:w-1/2">
+                <label for="elevation" class="block text-sm font-medium text-gray-700 mb-1">Custom Elevation (meters)</label>
+                <div class="flex gap-2">
+                    <input 
+                        type="number" 
+                        id="elevation" 
+                        x-model="customElevation"
+                        placeholder="e.g. 3500"
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-nepal-blue"
+                    >
+                    <button 
+                        @click="calculateMountainWeather()"
+                        class="bg-nepal-blue hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300"
+                        :disabled="!selectedLocation || !customElevation"
+                        :class="{'opacity-50 cursor-not-allowed': !selectedLocation || !customElevation}"
+                    >
+                        Calculate
+                    </button>
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Use this to adjust weather data for specific elevations</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div x-show="loading" class="flex justify-center py-12">
+        <svg class="animate-spin h-10 w-10 text-nepal-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </div>
+
+    <!-- Weather Data Display - Modern Version -->
+    <div x-show="!loading && weatherData" class="mb-8">
+        <!-- Current Weather Card -->
+        <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+            <!-- Weather Header - Modern Glass Effect -->
+            <div class="relative overflow-hidden">
+                <!-- Background Image Based on Weather Condition -->
+                <div class="absolute inset-0 z-0">
+                    <template x-if="weatherData.condition.toLowerCase().includes('clear') || weatherData.condition.toLowerCase().includes('sun')">
+                        <img src="https://images.unsplash.com/photo-1586348943529-beaae6c28db9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80" class="w-full h-full object-cover" alt="Clear Sky">
+                    </template>
+                    <template x-if="weatherData.condition.toLowerCase().includes('cloud')">
+                        <img src="https://images.unsplash.com/photo-1534088568595-a066f410bcda?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80" class="w-full h-full object-cover" alt="Cloudy Sky">
+                    </template>
+                    <template x-if="weatherData.condition.toLowerCase().includes('rain')">
+                        <img src="https://images.unsplash.com/photo-1518803194621-27188ba362c9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80" class="w-full h-full object-cover" alt="Rainy Weather">
+                    </template>
+                    <template x-if="!weatherData.condition.toLowerCase().includes('clear') && 
+                                !weatherData.condition.toLowerCase().includes('sun') && 
+                                !weatherData.condition.toLowerCase().includes('cloud') && 
+                                !weatherData.condition.toLowerCase().includes('rain')">
+                        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80" class="w-full h-full object-cover" alt="Mountain Weather">
+                    </template>
+                    <div class="absolute inset-0 bg-gradient-to-r from-nepal-blue/90 to-nepal-blue/70 backdrop-blur-sm"></div>
+                </div>
+
+                <!-- Weather Content -->
+                <div class="relative z-10 p-8 text-white">
+                    <div class="flex flex-col md:flex-row justify-between items-center">
+                        <div class="mb-6 md:mb-0">
+                            <h2 class="text-3xl font-bold" x-text="weatherData.location"></h2>
+                            <div class="flex items-center text-white/80 mt-1">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span x-text="formatCoordinates(weatherData.location_coordinates)"></span>
+                            </div>
+                            <div class="mt-2 flex items-center space-x-4">
+                                <span class="flex items-center text-white/80 text-sm">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                                    </svg>
+                                    <span x-text="weatherData.elevation + ' m'"></span>
+                                </span>
+                                <span class="flex items-center text-white/80 text-sm">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span x-text="formatDateTime(weatherData.timestamp)"></span>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <!-- Weather Icon -->
+                            <div class="mr-4">
+                                <template x-if="weatherData.condition.toLowerCase().includes('clear') || weatherData.condition.toLowerCase().includes('sun')">
+                                    <svg class="w-16 h-16 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                </template>
+                                <template x-if="weatherData.condition.toLowerCase().includes('cloud')">
+                                    <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                    </svg>
+                                </template>
+                                <template x-if="weatherData.condition.toLowerCase().includes('rain')">
+                                    <svg class="w-16 h-16 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z M16 18l2 2m-2-2l-2 2"></path>
+                                    </svg>
+                                </template>
+                            </div>
+                            
+                            <!-- Temperature -->
+                            <div class="text-center">
+                                <div class="flex items-end">
+                                    <div class="text-6xl font-bold tracking-tighter" x-text="weatherData.temperature"></div>
+                                    <div class="text-3xl mb-1.5">°C</div>
+                                </div>
+                                <div class="text-white/80 text-sm">Feels like <span x-text="weatherData.feels_like + '°C'"></span></div>
+                                <div class="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 mt-2 text-sm" x-text="weatherData.condition"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Details Grid - Modern Cards -->
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-gray-800 mb-4">Weather Details</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <!-- Wind -->
+                    <div class="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <svg class="w-8 h-8 text-nepal-blue mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path>
+                        </svg>
+                        <div class="font-semibold text-gray-800">Wind</div>
+                        <div class="text-lg font-bold text-nepal-blue" x-text="weatherData.wind_speed + ' km/h'"></div>
+                        <div class="text-xs text-gray-500 mt-1" x-text="weatherData.wind_direction"></div>
+                    </div>
+                    
+                    <!-- Humidity -->
+                    <div class="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <svg class="w-8 h-8 text-nepal-blue mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                        <div class="font-semibold text-gray-800">Humidity</div>
+                        <div class="text-lg font-bold text-nepal-blue" x-text="weatherData.humidity + '%'"></div>
+                        <div class="text-xs text-gray-500 mt-1">Relative</div>
+                    </div>
+                    
+                    <!-- Pressure -->
+                    <div class="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <svg class="w-8 h-8 text-nepal-blue mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        <div class="font-semibold text-gray-800">Pressure</div>
+                        <div class="text-lg font-bold text-nepal-blue" x-text="weatherData.pressure + ' hPa'"></div>
+                        <div class="text-xs text-gray-500 mt-1">Barometric</div>
+                    </div>
+                    
+                    <!-- Visibility -->
+                    <div class="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <svg class="w-8 h-8 text-nepal-blue mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <div class="font-semibold text-gray-800">Visibility</div>
+                        <div class="text-lg font-bold text-nepal-blue" x-text="(weatherData.visibility / 1000).toFixed(1) + ' km'"></div>
+                        <div class="text-xs text-gray-500 mt-1">Range</div>
+                    </div>
+                    
+                    <!-- Precipitation -->
+                    <div class="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <svg class="w-8 h-8 text-nepal-blue mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                        <div class="font-semibold text-gray-800">Precipitation</div>
+                        <div class="text-lg font-bold text-nepal-blue" x-text="weatherData.precipitation + ' mm'"></div>
+                        <div class="text-xs text-gray-500 mt-1">Last 24h</div>
+                    </div>
+                    
+                    <!-- UV Index -->
+                    <div class="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <svg class="w-8 h-8 text-nepal-blue mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        <div class="font-semibold text-gray-800">UV Index</div>
+                        <div class="text-lg font-bold text-nepal-blue" x-text="weatherData.uv_index"></div>
+                        <div class="text-xs text-gray-500 mt-1" x-text="getUVLevelShort(weatherData.uv_index)"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<!-- 7-Day Forecast -->
+<div x-show="!loading && forecast && forecast.length > 0" class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">7-Day Forecast</h2>
+    <div class="bg-white rounded-lg shadow-md overflow-x-auto">
+        <div class="min-w-max">
+            <!-- Changed from grid to flex for better responsive behavior -->
+            <div class="flex divide-x divide-gray-200">
+                <template x-for="(day, index) in forecast" :key="index">
+                    <div class="p-4 text-center hover:bg-gray-50 transition-colors duration-200 min-w-[130px]">
+                        <div class="font-semibold mb-1" x-text="formatDay(day.date)"></div>
+                        <div class="text-gray-500 text-sm mb-2" x-text="formatDate(day.date)"></div>
+                        <div class="flex flex-col items-center">
+                            <div class="text-xl font-bold text-nepal-blue" x-text="day.max_temp + '°'"></div>
+                            <div class="text-sm text-gray-600" x-text="day.min_temp + '°'"></div>
+                        </div>
+                        <div class="my-3 h-10 flex items-center justify-center">
+                            <!-- Rain condition -->
+                            <template x-if="day.condition.toLowerCase().includes('rain') || day.condition.toLowerCase().includes('drizzle')">
+                                <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 14v6m-2-4v4m-4-2v2"></path>
+                                </svg>
+                            </template>
+                            
+                            <!-- Sun/Clear condition -->
+                            <template x-if="day.condition.toLowerCase().includes('sun') || day.condition.toLowerCase().includes('clear')">
+                                <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                            </template>
+                            
+                            <!-- Cloud condition -->
+                            <template x-if="day.condition.toLowerCase().includes('cloud') || day.condition.toLowerCase().includes('overcast')">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                </svg>
+                            </template>
+                            
+                            <!-- Snow condition -->
+                            <template x-if="day.condition.toLowerCase().includes('snow')">
+                                <svg class="w-8 h-8 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 17l.5.5m.5.5l.5.5m-.5-.5l.5-.5m-.5-.5l-.5.5m3-3l.5.5m.5.5l.5.5m-.5-.5l.5-.5m-.5-.5l-.5.5"></path>
+                                </svg>
+                            </template>
+                            
+                            <!-- Thunder/Storm condition -->
+                            <template x-if="day.condition.toLowerCase().includes('thunder') || day.condition.toLowerCase().includes('storm')">
+                                <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 8l-4 6h6l-4 6"></path>
+                                </svg>
+                            </template>
+                            
+                            <!-- Fog/Mist condition (NEW) -->
+                            <template x-if="day.condition.toLowerCase().includes('fog') || day.condition.toLowerCase().includes('mist')">
+                                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 17h16M4 14h16M4 11h16"></path>
+                                </svg>
+                            </template>
+                            
+                            <!-- Default/Other condition -->
+                            <template x-if="!day.condition.toLowerCase().includes('rain') && 
+                                          !day.condition.toLowerCase().includes('drizzle') && 
+                                          !day.condition.toLowerCase().includes('sun') && 
+                                          !day.condition.toLowerCase().includes('clear') && 
+                                          !day.condition.toLowerCase().includes('cloud') && 
+                                          !day.condition.toLowerCase().includes('overcast') &&
+                                          !day.condition.toLowerCase().includes('snow') &&
+                                          !day.condition.toLowerCase().includes('thunder') &&
+                                          !day.condition.toLowerCase().includes('storm') &&
+                                          !day.condition.toLowerCase().includes('fog') &&
+                                          !day.condition.toLowerCase().includes('mist')">
+                                <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                </svg>
+                            </template>
+                        </div>
+                        
+                        <!-- Condition text -->
+                        <div class="text-xs font-medium text-gray-700 mt-1 max-w-[90px] mx-auto truncate" x-text="day.condition"></div>
+                        
+                        <!-- Precipitation chance - IMPROVED -->
+                        <div class="text-xs mt-2">
+                            <span class="inline-flex items-center">
+                                <svg class="w-3 h-3 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                </svg>
+                                <span x-text="day.precipitation_chance + '%'"></span>
+                            </span>
+                        </div>
+                        
+                        <!-- Sunrise/Sunset times -->
+                        <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
+                            <span title="Sunrise">↑ <span x-text="formatTime(day.sunrise)"></span></span>
+                            <span title="Sunset">↓ <span x-text="formatTime(day.sunset)"></span></span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    <!-- Temperature Chart -->
+    <div x-show="!loading && forecast && forecast.length > 0" class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Temperature Trend</h2>
+        <div class="h-64">
+            <canvas id="temperatureChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Mountain Weather Explanation -->
+    <div class="bg-blue-50 p-6 rounded-lg mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-2">High Altitude Weather</h2>
+        <p class="text-gray-700 mb-4">
+            Weather conditions in the mountains can vary significantly from lower elevations. For every 100m increase in elevation:
+        </p>
+        <ul class="list-disc list-inside text-gray-700 mb-4">
+            <li>Temperature typically decreases by approximately 0.65°C</li>
+            <li>Pressure decreases by around 12 hPa (or 1.2 kPa)</li>
+            <li>UV intensity increases due to thinner atmosphere</li>
+        </ul>
+        <p class="text-gray-700">
+            Use the elevation calculator above to estimate weather conditions at specific mountain elevations. This is particularly useful for trekkers and mountaineers planning expeditions in Nepal's Himalayan region.
+        </p>
+    </div>
+    
+    <!-- No Data State -->
+    <div x-show="!loading && !weatherData" class="bg-white rounded-lg shadow-md p-8 text-center">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-700 mb-1">Select a Location</h3>
+        <p class="text-gray-500">Choose a location from the dropdown menu to view weather data</p>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-nepal-blue text-white mt-12">
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-xl font-bold mb-4">Nepal Tourism API</h3>
+                <p class="text-gray-300">Comprehensive data on Nepal's tourist destinations, weather, trails, and more.</p>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">API Resources</h4>
+                <ul class="space-y-2">
+                    <li><a href="/api/docs/" class="text-gray-300 hover:text-white">API Documentation</a></li>
+                    <li><a href="/api/redoc/" class="text-gray-300 hover:text-white">ReDoc Documentation</a></li>
+                    <li><a href="/api/v1/" class="text-gray-300 hover:text-white">API Endpoints</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Categories</h4>
+                <ul class="space-y-2">
+                    <li><a href="/destinations" class="text-gray-300 hover:text-white">Destinations</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white">Trekking Routes</a></li>
+                    <li><a href="/weather" class="text-gray-300 hover:text-white">Weather Data</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white">Lodging Options</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                <p class="text-gray-300">info@nepaltourismapi.com</p>
+                <p class="text-gray-300">+977 1 XXXX XXX</p>
+                <div class="mt-4 flex space-x-4">
+                    <a href="#" class="text-gray-300 hover:text-white">
+                        <span class="sr-only">Twitter</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-300 hover:text-white">
+                        <span class="sr-only">GitHub</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="mt-8 pt-6 border-t border-gray-700 text-center">
+            <p class="text-gray-300">&copy; 2025 Nepal Tourism API. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Alpine.js Data -->
+<script>
+    function weatherApp() {
+        return {
+            apiUrl: '/api/v1/weather/',
+            forecastUrl: '/api/v1/weather-forecast/',
+            selectedLocation: '',
+            customElevation: '',
+            weatherData: null,
+            forecast: null,
+            loading: false,
+            temperatureChart: null,
+            mobileMenuOpen: false,
+            
+            init() {
+                // Check if there's a location in URL params
+                const urlParams = new URLSearchParams(window.location.search);
+                const locationParam = urlParams.get('location');
+                if (locationParam) {
+                    this.selectedLocation = locationParam;
+                    this.loadWeatherData();
+                    
+                    // Add this debugging code
+                    console.log('Selected location:', this.selectedLocation);
+                }
+                
+                // Add event listener for network issues or errors
+                window.addEventListener('error', function(e) {
+                    console.error('Global error:', e.message);
+                });
+            },
+            
+            loadWeatherData() {
+                if (!this.selectedLocation) return;
+                
+                this.loading = true;
+                
+                // Update URL with location parameter
+                const url = new URL(window.location);
+                url.searchParams.set('location', this.selectedLocation);
+                window.history.pushState({}, '', url);
+                
+                // Fetch current weather
+                axios.get(`${this.apiUrl}latest/`, {
+                    params: { location: this.selectedLocation }
+                })
+                .then(response => {
+                    this.weatherData = response.data;
+                    
+                    // After getting weather data, fetch forecast
+                    this.loadForecast();
+                })
+                .catch(error => {
+                    console.error('Error loading weather data:', error);
+                    this.weatherData = null;
+                    this.loading = false;
+                    alert('Could not load weather data for this location');
+                });
+            },
+            
+            loadForecast() {
+                axios.get(`${this.forecastUrl}for_location/`, {
+                    params: { location: this.selectedLocation }
+                })
+                .then(response => {
+                    // Add debugging to see the response
+                    console.log('Forecast data:', response.data);
+                    
+                    // Make sure we properly handle the response format
+                    if (Array.isArray(response.data)) {
+                        this.forecast = response.data;
+                    } else if (response.data && Array.isArray(response.data.results)) {
+                        // Some APIs wrap results in a container object
+                        this.forecast = response.data.results;
+                    } else {
+                        console.error('Unexpected forecast data format:', response.data);
+                        this.forecast = [];
+                    }
+                    
+                    this.loading = false;
+                    
+                    // Check if we actually have data before trying to create the chart
+                    if (this.forecast && this.forecast.length > 0) {
+                        // Create the temperature chart after a short delay to allow DOM to update
+                        setTimeout(() => {
+                            this.createTemperatureChart();
+                        }, 100);
+                    } else {
+                        console.warn('No forecast data available to display');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading forecast data:', error);
+                    this.forecast = null;
+                    this.loading = false;
+                });
+            },
+            
+            calculateMountainWeather() {
+                if (!this.selectedLocation || !this.customElevation) return;
+                
+                this.loading = true;
+                
+                axios.get(`${this.apiUrl}mountain/`, {
+                    params: { 
+                        location: this.selectedLocation,
+                        elevation: this.customElevation
+                    }
+                })
+                .then(response => {
+                    this.weatherData = response.data;
+                    this.loading = false;
+                })
+                .catch(error => {
+                    console.error('Error calculating mountain weather:', error);
+                    this.loading = false;
+                    alert('Could not calculate weather for this elevation');
+                });
+            },
+            
+            createTemperatureChart() {
+                if (!this.forecast || this.forecast.length === 0) return;
+                
+                const ctx = document.getElementById('temperatureChart').getContext('2d');
+                
+                // Destroy previous chart if it exists
+                if (this.temperatureChart) {
+                    this.temperatureChart.destroy();
+                }
+                
+                // Prepare data for chart
+                const labels = this.forecast.map(day => this.formatDate(day.date));
+                const maxTemps = this.forecast.map(day => day.max_temp);
+                const minTemps = this.forecast.map(day => day.min_temp);
+                
+                this.temperatureChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Max Temperature (°C)',
+                                data: maxTemps,
+                                borderColor: '#DC143C',
+                                backgroundColor: 'rgba(220, 20, 60, 0.1)',
+                                tension: 0.3,
+                                pointBackgroundColor: '#DC143C',
+                                fill: false
+                            },
+                            {
+                                label: 'Min Temperature (°C)',
+                                data: minTemps,
+                                borderColor: '#003893',
+                                backgroundColor: 'rgba(0, 56, 147, 0.1)',
+                                tension: 0.3,
+                                pointBackgroundColor: '#003893',
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                title: {
+                                    display: true,
+                                    text: 'Temperature (°C)'
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+            
+            formatDateTime(dateTimeStr) {
+                const date = new Date(dateTimeStr);
+                return date.toLocaleString();
+            },
+            
+            formatDate(dateStr) {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            },
+            
+            formatDay(dateStr) {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-US', { weekday: 'short' });
+            },
+            
+            formatTime(timeStr) {
+                // Format time like "06:30" to "6:30 AM"
+                if (!timeStr) return "N/A";
+                
+                const [hours, minutes] = timeStr.split(':');
+                let hour = parseInt(hours);
+                const ampm = hour >= 12 ? 'PM' : 'AM';
+                
+                hour = hour % 12;
+                hour = hour ? hour : 12; // Convert 0 to 12
+                
+                return `${hour}:${minutes} ${ampm}`;
+            },
+            
+            formatCoordinates(coords) {
+                if (!coords) return "N/A";
+                return `${coords.lat}, ${coords.lng}`;
+            },
+            
+            getUVLevel(uvIndex) {
+                if (uvIndex <= 2) return `${uvIndex} - Low`;
+                if (uvIndex <= 5) return `${uvIndex} - Moderate`;
+                if (uvIndex <= 7) return `${uvIndex} - High`;
+                if (uvIndex <= 10) return `${uvIndex} - Very High`;
+                return `${uvIndex} - Extreme`;
+            },
+
+            getUVLevelShort(uvIndex) {
+                if (uvIndex <= 2) return "Low";
+                if (uvIndex <= 5) return "Moderate";
+                if (uvIndex <= 7) return "High";
+                if (uvIndex <= 10) return "Very High";
+                return "Extreme";
+            },
+        };
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepal Tourism - Trek & Trail Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Alpine.js for reactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Leaflet for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Custom Tailwind config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nepal: {
+                            red: '#DC143C',
+                            blue: '#003893'
+                        },
+                        status: {
+                            open: '#10B981',
+                            caution: '#F59E0B',
+                            closed: '#EF4444'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 1s ease-in-out',
+                        'fade-in-up': 'fadeInUp 1s ease-out',
+                        'fade-in-down': 'fadeInDown 0.7s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        fadeInDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        [x-cloak] { display: none !important; }
+        .status-badge-open {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+        .status-badge-caution {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+        .status-badge-closed {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+        .map-container {
+            height: 500px;
+        }
+        @media (max-width: 640px) {
+            .map-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans" x-data="trailsApp()">
+    <!-- Modern Navbar -->
+    <header class="bg-nepal-blue text-white sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <!-- Top nav section with logo -->
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <a href="/" class="flex items-center space-x-2">
+                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 3L12 9L6 3H4V21H6V8L12 14L18 8V21H20V3H18Z" fill="currentColor"/>
+                    </svg>
+                    <span class="font-bold text-xl tracking-tight">Nepal Tourism</span>
+                </a>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="text-white hover:text-nepal-red focus:outline-none">
+                        <svg class="h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="h-6 w-6" x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Desktop nav links -->
+                <nav class="hidden md:flex md:items-center md:space-x-8">
+                    <a href="/" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Home</a>
+                    <a href="/destinations" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Destinations</a>
+                    <a href="/weather" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Weather</a>
+                    <a href="/trails" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 border-b-2 border-nepal-red pb-1">Trails</a>
+                    <div class="relative group">
+                        <button class="flex items-center hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">
+                            Info
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">About Nepal</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Travel Guide</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">FAQ</a>
+                        </div>
+                    </div>
+                    <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">API Docs</a>
+                </nav>
+            </div>
+            
+            <!-- Mobile nav links -->
+            <div class="md:hidden transition-all duration-300 ease-in-out max-h-0 overflow-hidden" :class="{'max-h-96': mobileMenuOpen, 'max-h-0': !mobileMenuOpen}">
+                <nav class="flex flex-col space-y-3 pb-3">
+                    <a href="/" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Home</a>
+                    <a href="/destinations" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Destinations</a>
+                    <a href="/weather" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Weather</a>
+                    <a href="/trails" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Trails</a>
+                    <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">About Nepal</a>
+                    <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Travel Guide</a>
+                    <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm inline-block w-fit">API Docs</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="relative py-16 bg-nepal-blue">
+        <!-- Background image -->
+        <div class="absolute inset-0 opacity-20">
+            <img src="https://images.unsplash.com/photo-1526772662000-3f88f10405ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80" alt="Nepal Trails" class="w-full h-full object-cover">
+        </div>
+        
+        <!-- Content -->
+        <div class="container mx-auto px-4 relative z-10 text-white">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Nepal Trek & Trail Status</h1>
+            <p class="text-xl opacity-90 max-w-3xl mb-6">Real-time status updates for Nepal's popular trekking routes, including alerts and safety information for trekkers.</p>
+            
+            <!-- Trails Legend -->
+            <div class="flex flex-wrap gap-4 mt-4">
+                <div class="flex items-center">
+                    <span class="inline-block w-3 h-3 rounded-full bg-status-open mr-2"></span>
+                    <span class="text-white/90">Open</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="inline-block w-3 h-3 rounded-full bg-status-caution mr-2"></span>
+                    <span class="text-white/90">Caution</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="inline-block w-3 h-3 rounded-full bg-status-closed mr-2"></span>
+                    <span class="text-white/90">Closed</span>
+                </div>
+                <div class="flex items-center ml-6">
+                    <svg class="w-5 h-5 animate-pulse-slow text-yellow-300 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" fill-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-white/90">Active Alerts</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Status Overview Map -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Trails Overview Map</h2>
+            <div id="overview-map" class="map-container rounded-lg"></div>
+        </div>
+        
+        <!-- Search and Filter Controls -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="w-full md:w-1/3">
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <input 
+                        type="text" 
+                        id="search" 
+                        x-model="searchTerm" 
+                        @input="filterTrails()"
+                        placeholder="Search trails..." 
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-nepal-blue"
+                    >
+                </div>
+                
+                <div class="w-full md:w-1/4">
+                    <label for="region" class="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                    <select 
+                        id="region" 
+                        x-model="selectedRegion" 
+                        @change="filterTrails()"
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-nepal-blue"
+                    >
+                        <option value="">All Regions</option>
+                        <template x-for="region in regions" :key="region">
+                            <option :value="region" x-text="region"></option>
+                        </template>
+                    </select>
+                </div>
+                
+                <div class="w-full md:w-1/4">
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select 
+                        id="status" 
+                        x-model="selectedStatus" 
+                        @change="filterTrails()"
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-nepal-blue"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="open">Open</option>
+                        <option value="caution">Caution</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
+                
+                <div class="w-full md:w-1/6 md:self-end">
+                    <button 
+                        @click="showAlertsOnly = !showAlertsOnly; filterTrails()"
+                        class="w-full py-2 px-4 border rounded-lg transition-colors duration-200 text-sm"
+                        :class="showAlertsOnly ? 'bg-yellow-50 border-yellow-200 text-yellow-700' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                    >
+                        <div class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-1" :class="showAlertsOnly ? 'text-yellow-500' : 'text-gray-400'" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" fill-rule="evenodd"></path>
+                            </svg>
+                            <span>Alerts Only</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="flex justify-center py-12">
+            <svg class="animate-spin h-10 w-10 text-nepal-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <!-- Trail Grid -->
+        <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <template x-for="trail in filteredTrails" :key="trail.id">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <!-- Trail Header with Status -->
+                    <div class="relative p-5 border-b flex justify-between items-center" :class="{
+                        'bg-status-open/10 border-status-open/20': trail.status === 'open',
+                        'bg-status-caution/10 border-status-caution/20': trail.status === 'caution',
+                        'bg-status-closed/10 border-status-closed/20': trail.status === 'closed'
+                    }">
+                        <h2 class="text-xl font-bold text-gray-800" x-text="trail.name"></h2>
+                        <span class="px-3 py-1 rounded-full text-sm font-medium" :class="{
+                            'status-badge-open': trail.status === 'open',
+                            'status-badge-caution': trail.status === 'caution',
+                            'status-badge-closed': trail.status === 'closed'
+                        }" x-text="trail.status.charAt(0).toUpperCase() + trail.status.slice(1)"></span>
+                    </div>
+                    
+                    <!-- Trail Content -->
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-sm font-medium text-nepal-blue" x-text="trail.region"></span>
+                            <span class="text-xs text-gray-500" x-text="'Last updated: ' + formatDate(trail.last_updated)"></span>
+                        </div>
+                        
+                        <!-- Alert Indicator -->
+                        <div x-show="hasAlerts(trail)" class="mb-4 flex items-center p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                            <svg class="w-5 h-5 text-yellow-500 mr-2 flex-shrink-0 animate-pulse-slow" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-sm font-medium text-yellow-700" x-text="countAlerts(trail) + ' active alert' + (countAlerts(trail) > 1 ? 's' : '')"></span>
+                        </div>
+                        
+                        <!-- Trail Segments -->
+                        <div class="space-y-3 mb-4">
+                            <template x-for="segment in trail.conditions" :key="segment.segment">
+                                <div class="flex justify-between items-center p-2 rounded" :class="{
+                                    'bg-green-50': segment.status === 'open',
+                                    'bg-yellow-50': segment.status === 'caution',
+                                    'bg-red-50': segment.status === 'closed'
+                                }">
+                                    <span class="text-sm font-medium" x-text="segment.segment"></span>
+                                    <span class="text-xs px-2 py-1 rounded" :class="{
+                                        'bg-green-100 text-green-800': segment.status === 'open',
+                                        'bg-yellow-100 text-yellow-800': segment.status === 'caution',
+                                        'bg-red-100 text-red-800': segment.status === 'closed'
+                                    }" x-text="segment.status"></span>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <!-- View Details Button -->
+                        <div class="flex justify-end">
+                            <button 
+                                @click="viewTrailDetails(trail)"
+                                class="bg-nepal-blue hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center"
+                            >
+                                View Details
+                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+        
+        <!-- Empty State -->
+        <div x-show="!loading && filteredTrails.length === 0" class="bg-white rounded-lg shadow-md p-8 text-center">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-700 mb-1">No trails found</h3>
+            <p class="text-gray-500">Try adjusting your search filters</p>
+        </div>
+        
+        <!-- Trail Details Modal -->
+        <div 
+            x-show="showModal" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 overflow-y-auto" 
+            x-cloak
+        >
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div 
+                    x-show="showModal" 
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    @click="showModal = false" 
+                    class="fixed inset-0 transition-opacity"
+                >
+                    <div class="absolute inset-0 bg-gray-800 opacity-75"></div>
+                </div>
+
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+
+                <div 
+                    x-show="showModal" 
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full max-h-[90vh] overflow-y-auto"
+                >
+                    <!-- Modal Content -->
+                    <div class="bg-white">
+                        <!-- Modal Header -->
+                        <div class="px-6 py-4 border-b">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-2xl font-bold text-gray-800" x-text="selectedTrail?.name || 'Trail Details'"></h3>
+                                <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="px-6 py-4">
+                            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                                <!-- Left Column: Map and Trail Status -->
+                                <div class="lg:col-span-3">
+                                    <!-- Trail Status Banner -->
+                                    <div class="rounded-lg p-4 mb-6 flex items-center justify-between" :class="{
+                                        'bg-green-50 border border-green-100': selectedTrail?.status === 'open',
+                                        'bg-yellow-50 border border-yellow-100': selectedTrail?.status === 'caution',
+                                        'bg-red-50 border border-red-100': selectedTrail?.status === 'closed'
+                                    }">
+                                        <div class="flex items-center">
+                                            <svg class="w-6 h-6 mr-2" :class="{
+                                                'text-green-500': selectedTrail?.status === 'open',
+                                                'text-yellow-500': selectedTrail?.status === 'caution',
+                                                'text-red-500': selectedTrail?.status === 'closed'
+                                            }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path x-show="selectedTrail?.status === 'open'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                <path x-show="selectedTrail?.status === 'caution'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                                <path x-show="selectedTrail?.status === 'closed'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span class="font-semibold" :class="{
+                                                'text-green-700': selectedTrail?.status === 'open',
+                                                'text-yellow-700': selectedTrail?.status === 'caution',
+                                                'text-red-700': selectedTrail?.status === 'closed'
+                                            }" x-text="selectedTrail?.status === 'open' ? 'Trail Open' : selectedTrail?.status === 'caution' ? 'Use Caution' : 'Trail Closed'"></span>
+                                        </div>
+                                        <span class="text-sm text-gray-600" x-text="'Last updated: ' + formatDate(selectedTrail?.last_updated)"></span>
+                                    </div>
+                                    
+                                    <!-- Trail Map -->
+                                    <div class="mb-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Trail Map</h4>
+                                        <div id="trail-detail-map" class="h-64 rounded-lg bg-gray-100"></div>
+                                    </div>
+                                    
+                                    <!-- Trail Segments -->
+                                    <div class="mb-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Trail Segments</h4>
+                                        <div class="space-y-4">
+                                            <template x-for="segment in selectedTrail?.conditions" :key="segment.segment">
+                                                <div class="border rounded-lg overflow-hidden">
+                                                    <div class="p-3 border-b flex justify-between items-center" :class="{
+                                                        'bg-green-50 border-green-100': segment.status === 'open',
+                                                        'bg-yellow-50 border-yellow-100': segment.status === 'caution',
+                                                        'bg-red-50 border-red-100': segment.status === 'closed'
+                                                    }">
+                                                        <h5 class="font-medium" x-text="segment.segment"></h5>
+                                                        <span class="px-2 py-1 rounded text-xs font-semibold" :class="{
+                                                            'bg-green-100 text-green-800': segment.status === 'open',
+                                                            'bg-yellow-100 text-yellow-800': segment.status === 'caution',
+                                                            'bg-red-100 text-red-800': segment.status === 'closed'
+                                                        }" x-text="segment.status.toUpperCase()"></span>
+                                                    </div>
+                                                    <div class="p-3 bg-gray-50" x-show="segment.description">
+                                                        <p class="text-sm text-gray-600" x-text="segment.description"></p>
+                                                    </div>
+                                                    <!-- Segment Alerts -->
+                                                    <div x-show="segment.alerts && segment.alerts.length > 0" class="p-3 bg-yellow-50 border-t border-yellow-100">
+                                                        <h6 class="text-sm font-semibold text-yellow-700 mb-2">Alerts</h6>
+                                                        <div class="space-y-3">
+                                                            <template x-for="alert in segment.alerts" :key="alert.type + alert.severity">
+                                                                <div class="bg-white rounded p-3 border border-yellow-100 text-sm">
+                                                                    <div class="flex justify-between mb-1">
+                                                                        <span class="font-medium uppercase text-xs" :class="{
+                                                                            'text-yellow-600': alert.severity === 'medium',
+                                                                            'text-red-600': alert.severity === 'high',
+                                                                            'text-green-600': alert.severity === 'low'
+                                                                        }" x-text="alert.type + ' (' + alert.severity + ')'"></span>
+                                                                        <span class="text-xs text-gray-500" x-text="formatDate(alert.reported_at)"></span>
+                                                                    </div>
+                                                                    <p class="text-gray-700" x-text="alert.description"></p>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right Column: Quick Facts and Additional Info -->
+                                <div class="lg:col-span-2">
+                                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Quick Facts</h4>
+                                        
+                                        <div class="space-y-3">
+                                            <div class="flex items-start">
+                                                <svg class="w-5 h-5 text-nepal-blue mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-700">Region</p>
+                                                    <p class="text-sm text-gray-600" x-text="selectedTrail?.region || 'N/A'"></p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="flex items-start">
+                                                <svg class="w-5 h-5 text-nepal-blue mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path>
+                                                </svg>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-700">Number of Segments</p>
+                                                    <p class="text-sm text-gray-600" x-text="selectedTrail?.conditions?.length || '0'"></p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="flex items-start">
+                                                <svg class="w-5 h-5 text-nepal-blue mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-700">Data Source</p>
+                                                    <p class="text-sm text-gray-600" x-text="selectedTrail?.source || 'Nepal Tourism Board'"></p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="flex items-start" x-show="countAlerts(selectedTrail) > 0">
+                                                <svg class="w-5 h-5 text-nepal-blue mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                                </svg>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-700">Active Alerts</p>
+                                                    <p class="text-sm text-gray-600" x-text="countAlerts(selectedTrail)"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- General Safety Information -->
+                                    <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Trekking Safety Tips</h4>
+                                        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+                                            <li>Always check the latest trail conditions before starting your trek</li>
+                                            <li>Carry enough water and stay hydrated</li>
+                                            <li>Inform someone of your trekking itinerary</li>
+                                            <li>Hire a licensed guide for unfamiliar trails</li>
+                                            <li>Respect local customs and protected areas</li>
+                                            <li>Carry a first aid kit and emergency supplies</li>
+                                            <li>Be prepared for sudden weather changes</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <!-- Related Links -->
+                                    <div class="rounded-lg mb-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Related Information</h4>
+                                        <div class="space-y-2">
+                                            <a href="/weather" class="flex items-center p-3 bg-white rounded-lg border hover:bg-gray-50 transition-colors duration-200">
+                                                <svg class="w-5 h-5 text-nepal-blue mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                                </svg>
+                                                <span class="text-gray-700">Check Weather Conditions</span>
+                                            </a>
+                                            <a href="#" class="flex items-center p-3 bg-white rounded-lg border hover:bg-gray-50 transition-colors duration-200">
+                                                <svg class="w-5 h-5 text-nepal-blue mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                </svg>
+                                                <span class="text-gray-700">Find Licensed Guides</span>
+                                            </a>
+                                            <a href="#" class="flex items-center p-3 bg-white rounded-lg border hover:bg-gray-50 transition-colors duration-200">
+                                                <svg class="w-5 h-5 text-nepal-blue mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                                </svg>
+                                                <span class="text-gray-700">Emergency Contacts</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="px-6 py-4 bg-gray-50 border-t flex justify-between">
+                            <button @click="showModal = false" class="px-4 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors duration-300">
+                                Close
+                            </button>
+                            
+                            <div class="flex space-x-2">
+                                <a href="/weather" class="bg-nepal-blue hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center">
+                                    Check Weather
+                                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </a>
+                                <a :href="'/api/v1/trails/' + selectedTrail?.id" target="_blank" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center">
+                                    API Data
+                                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Newsletter / Alert Signup -->
+    <section class="bg-nepal-blue py-12 text-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4">Stay Updated with Trail Alerts</h2>
+                <p class="text-white/80 mb-6">Receive immediate notifications about trail status changes, closures, and safety alerts directly to your email.</p>
+                <form class="flex flex-col sm:flex-row gap-2 max-w-lg mx-auto">
+                    <input 
+                        type="email" 
+                        placeholder="Your email address" 
+                        class="px-4 py-3 rounded-lg flex-grow bg-white/10 backdrop-blur-sm text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-white/50"
+                    >
+                    <button type="submit" class="bg-white text-nepal-blue hover:bg-gray-100 font-bold py-3 px-6 rounded-lg transition-colors duration-300">
+                        Subscribe
+                    </button>
+                </form>
+                <p class="text-xs mt-4 text-white/60">We respect your privacy. You can unsubscribe at any time.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-nepal-blue bg-opacity-90 text-white">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Nepal Tourism API</h3>
+                    <p class="text-gray-300">Comprehensive data on Nepal's tourist destinations, weather, trails, and more.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">API Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/api/docs/" class="text-gray-300 hover:text-white">API Documentation</a></li>
+                        <li><a href="/api/redoc/" class="text-gray-300 hover:text-white">ReDoc Documentation</a></li>
+                        <li><a href="/api/v1/" class="text-gray-300 hover:text-white">API Endpoints</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Categories</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/destinations" class="text-gray-300 hover:text-white">Destinations</a></li>
+                        <li><a href="/trails" class="text-gray-300 hover:text-white">Trekking Routes</a></li>
+                        <li><a href="/weather" class="text-gray-300 hover:text-white">Weather Data</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Lodging Options</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                    <p class="text-gray-300">info@nepaltourismapi.com</p>
+                    <p class="text-gray-300">+977 1 XXXX XXX</p>
+                    <div class="mt-4 flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white">
+                            <span class="sr-only">Twitter</span>
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white">
+                            <span class="sr-only">GitHub</span>
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12 pt-8 border-t border-white/20 text-center">
+                <p class="text-gray-300">&copy; 2025 Nepal Tourism API. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alpine.js Data -->
+    <script>
+        function trailsApp() {
+            return {
+                apiUrl: '/api/v1/trails/',
+                trails: [],
+                filteredTrails: [],
+                regions: [],
+                selectedTrail: null,
+                searchTerm: '',
+                selectedRegion: '',
+                selectedStatus: '',
+                showAlertsOnly: false,
+                loading: true,
+                showModal: false,
+                mobileMenuOpen: false,
+                map: null,
+                detailMap: null,
+                markers: [],
+
+                init() {
+                    this.loadTrails();
+                    
+                    // Initialize overview map
+                    this.$nextTick(() => {
+                        this.initializeMap();
+                    });
+                },
+                
+                initializeMap() {
+                    // Initialize the overview map
+                    this.map = L.map('overview-map').setView([28.3949, 84.1240], 7);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(this.map);
+                },
+                
+                updateMapMarkers() {
+                    // Clear existing markers
+                    if (this.markers.length > 0) {
+                        this.markers.forEach(marker => this.map.removeLayer(marker));
+                        this.markers = [];
+                    }
+                    
+                    // Add markers for trails
+                    this.filteredTrails.forEach(trail => {
+                        if (!trail.location_coordinates) return;
+                        
+                        let coordinates = [trail.location_coordinates.lat, trail.location_coordinates.lng];
+                        
+                        // Skip if coordinates are invalid
+                        if (!coordinates[0] || !coordinates[1]) return;
+                        
+                        // Set marker color based on status
+                        let markerColor = trail.status === 'open' ? 'green' : 
+                                         trail.status === 'caution' ? 'orange' : 'red';
+                                         
+                        let marker = L.marker(coordinates).addTo(this.map);
+                        marker.bindPopup(`
+                            <div class="text-center">
+                                <div class="font-bold">${trail.name}</div>
+                                <div class="text-sm">${trail.region}</div>
+                                <div class="mt-2">
+                                    <span class="px-2 py-1 rounded text-xs font-bold" style="background-color: ${markerColor === 'green' ? '#d1fae5' : markerColor === 'orange' ? '#fef3c7' : '#fee2e2'}; color: ${markerColor === 'green' ? '#065f46' : markerColor === 'orange' ? '#92400e' : '#b91c1c'}">
+                                        ${trail.status.toUpperCase()}
+                                    </span>
+                                </div>
+                                <div class="mt-2">
+                                    <button onclick="document.querySelector('[x-data]').__x.$data.viewTrailDetails(${JSON.stringify(trail).replace(/"/g, '&quot;')})" class="text-sm text-blue-600 hover:underline">View Details</button>
+                                </div>
+                            </div>
+                        `);
+                        
+                        this.markers.push(marker);
+                    });
+                },
+                
+                updateDetailMap() {
+                    // Remove previous detail map if it exists
+                    if (this.detailMap) {
+                        this.detailMap.remove();
+                    }
+                    
+                    if (!this.selectedTrail || !this.selectedTrail.location_coordinates) return;
+                    
+                    // Initialize the detail map
+                    this.$nextTick(() => {
+                        this.detailMap = L.map('trail-detail-map').setView(
+                            [this.selectedTrail.location_coordinates.lat, this.selectedTrail.location_coordinates.lng], 
+                            10
+                        );
+                        
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        }).addTo(this.detailMap);
+                        
+                        // Add marker for the trail
+                        let markerColor = this.selectedTrail.status === 'open' ? 'green' : 
+                                        this.selectedTrail.status === 'caution' ? 'orange' : 'red';
+                                        
+                        L.marker([this.selectedTrail.location_coordinates.lat, this.selectedTrail.location_coordinates.lng])
+                            .addTo(this.detailMap)
+                            .bindPopup(`<div class="font-bold">${this.selectedTrail.name}</div><div>${this.selectedTrail.region}</div>`)
+                            .openPopup();
+                    });
+                },
+                
+                loadTrails() {
+                    this.loading = true;
+                    
+                    axios.get(this.apiUrl)
+                        .then(response => {
+                            // Mock location data as it might not be included in the API
+                            this.trails = response.data.map(trail => {
+                                // Example coordinates for demonstration - you should replace with actual data
+                                trail.location_coordinates = this.getTrailCoordinates(trail);
+                                return trail;
+                            });
+                            
+                            this.extractRegions();
+                            this.filterTrails();
+                            this.loading = false;
+                            
+                            // Update map markers after loading trails
+                            this.$nextTick(() => {
+                                this.updateMapMarkers();
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading trails:', error);
+                            this.loading = false;
+                        });
+                },
+                
+                // Mock function to generate coordinates - replace with actual data in production
+                getTrailCoordinates(trail) {
+                    // These are approximate coordinates for different regions in Nepal
+                    const regionCoordinates = {
+                        'Khumbu': { lat: 27.8018, lng: 86.7141 },
+                        'Annapurna': { lat: 28.5972, lng: 83.9580 },
+                        'Langtang': { lat: 28.2139, lng: 85.6178 },
+                        'Manaslu': { lat: 28.5525, lng: 84.5775 },
+                        'Dolpo': { lat: 29.0133, lng: 83.0014 },
+                        'Mustang': { lat: 29.1892, lng: 83.9744 },
+                        'Kathmandu Valley': { lat: 27.7172, lng: 85.3240 },
+                        'Helambu': { lat: 28.0352, lng: 85.4201 },
+                        'Rolwaling': { lat: 27.8745, lng: 86.2777 }
+                    };
+                    
+                    // Return coordinates based on region or a fallback for unknown regions
+                    return regionCoordinates[trail.region] || { 
+                        lat: 28.3949 + (Math.random() * 0.5), 
+                        lng: 84.1240 + (Math.random() * 0.5) 
+                    };
+                },
+                
+                extractRegions() {
+                    // Extract unique regions from trails
+                    const regionSet = new Set();
+                    this.trails.forEach(trail => {
+                        if (trail.region) regionSet.add(trail.region);
+                    });
+                    this.regions = Array.from(regionSet).sort();
+                },
+                
+                filterTrails() {
+                    this.filteredTrails = this.trails.filter(trail => {
+                        let matchesSearch = true;
+                        let matchesRegion = true;
+                        let matchesStatus = true;
+                        let matchesAlerts = true;
+                        
+                        // Search term filter
+                        if (this.searchTerm) {
+                            matchesSearch = trail.name.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
+                                           trail.region.toLowerCase().includes(this.searchTerm.toLowerCase());
+                        }
+                        
+                        // Region filter
+                        if (this.selectedRegion) {
+                            matchesRegion = trail.region === this.selectedRegion;
+                        }
+                        
+                        // Status filter
+                        if (this.selectedStatus) {
+                            matchesStatus = trail.status === this.selectedStatus;
+                        }
+                        
+                        // Alerts only filter
+                        if (this.showAlertsOnly) {
+                            matchesAlerts = this.hasAlerts(trail);
+                        }
+                        
+                        return matchesSearch && matchesRegion && matchesStatus && matchesAlerts;
+                    });
+                    
+                    // After filtering, update map markers
+                    this.$nextTick(() => {
+                        this.updateMapMarkers();
+                    });
+                },
+                
+                hasAlerts(trail) {
+                    if (!trail || !trail.conditions) return false;
+                    
+                    for (const segment of trail.conditions) {
+                        if (segment.alerts && segment.alerts.length > 0) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                
+                countAlerts(trail) {
+                    if (!trail || !trail.conditions) return 0;
+                    
+                    let count = 0;
+                    for (const segment of trail.conditions) {
+                        if (segment.alerts) {
+                            count += segment.alerts.length;
+                        }
+                    }
+                    return count;
+                },
+                
+                formatDate(dateString) {
+                    if (!dateString) return 'N/A';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                },
+                
+                viewTrailDetails(trail) {
+                    this.selectedTrail = trail;
+                    this.showModal = true;
+                    
+                    // Update the detail map after modal is shown
+                    this.$nextTick(() => {
+                        this.updateDetailMap();
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -24,7 +24,7 @@ from django.views.decorators.cache import cache_page
 class CachedReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     """Base ViewSet with caching for list and retrieve actions"""
     
-    @method_decorator(cache_page(60*15))  # Cache for 15 minutes
+    @method_decorator(cache_page(60*1))  # Cache for 15 minutes
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
         
@@ -87,9 +87,17 @@ class EventFilterSet(FilterSet):
         fields = ['type', 'city']
 
 
+def home_page(request):
+    """Render the home page"""
+    return render(request, 'home.html')
 
 def destinations_page(request):
     return render(request, 'destinations.html')
+# Add this function to serve the weather template
+def weather_page(request):
+    return render(request, 'weather.html')
+def trail_page(request):
+    return render(request, 'trails.html')
 
 class DestinationViewSet(CachedReadOnlyModelViewSet):
     """

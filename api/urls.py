@@ -18,6 +18,7 @@ router.register(r'trails', TrailStatusViewSet)
 router.register(r'weather', WeatherDataViewSet)
 router.register(r'forecasts', WeatherForecastViewSet)
 router.register(r'statistics', TourismStatViewSet)  
+router.register(r'weather-forecast', WeatherForecastViewSet, basename='weather-forecast')
 
 # The API URLs are now determined automatically by the router
 urlpatterns = [

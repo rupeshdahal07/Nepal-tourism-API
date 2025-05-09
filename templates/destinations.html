@@ -25,30 +25,157 @@
     </script>
 </head>
 <body class="bg-gray-100 min-h-screen" x-data="destinationsApp()">
-    <!-- Header -->
-    <header class="bg-nepal-blue text-white shadow-md">
-        <div class="container mx-auto px-4 py-6 flex flex-col md:flex-row md:items-center md:justify-between">
-            <div class="flex items-center justify-between mb-4 md:mb-0">
-                <h1 class="text-2xl font-bold flex items-center">
-                    <svg class="w-8 h-8 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M18 3L12 9L6 3H4V21H6V8L12 14L18 8V21H20V3H18Z" fill="currentColor"/>
+<!-- Modern Navbar -->
+<header class="bg-nepal-blue text-white sticky top-0 z-40">
+    <div class="container mx-auto px-4">
+        <!-- Top nav section with logo -->
+        <div class="flex items-center justify-between h-16">
+            <!-- Logo -->
+            <a href="/" class="flex items-center space-x-2">
+                <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 3L12 9L6 3H4V21H6V8L12 14L18 8V21H20V3H18Z" fill="currentColor"/>
+                </svg>
+                <span class="font-bold text-xl tracking-tight">Nepal Tourism</span>
+            </a>
+            
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="text-white hover:text-nepal-red focus:outline-none">
+                    <svg class="h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
-                    Nepal Tourism
-                </h1>
+                    <svg class="h-6 w-6" x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
-            <nav class="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-6">
-                <a href="#" class="hover:text-nepal-red font-semibold">Home</a>
-                <a href="#" class="hover:text-nepal-red font-semibold bg-nepal-red bg-opacity-20 px-3 py-1 rounded">Destinations</a>
-                <a href="#" class="hover:text-nepal-red font-semibold">Weather</a>
-                <a href="#" class="hover:text-nepal-red font-semibold">Trails</a>
-                <a href="#" class="hover:text-nepal-red font-semibold">About</a>
+            
+            <!-- Desktop nav links -->
+            <nav class="hidden md:flex md:items-center md:space-x-8">
+                <a href="{% url "home_page"  %}" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Home</a>
+                <a href="{% url "destinations_page" %}" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 border-b-2 border-nepal-red pb-1">Destinations</a>
+                <a href="{% url "weather_page" %}" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Weather</a>
+                <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Trails</a>
+                <div class="relative group">
+                    <button class="flex items-center hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">
+                        Info
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">About Nepal</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Travel Guide</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">FAQ</a>
+                    </div>
+                </div>
+                <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">API Docs</a>
             </nav>
         </div>
-    </header>
+        
+        <!-- Mobile nav links -->
+        <div class="md:hidden transition-all duration-300 ease-in-out max-h-0 overflow-hidden" :class="{'max-h-96': mobileMenuOpen, 'max-h-0': !mobileMenuOpen}" x-data="{ mobileMenuOpen: false }">
+            <nav class="flex flex-col space-y-3 pb-3">
+                <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Home</a>
+                <a href="#destinations" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Destinations</a>
+                <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Weather</a>
+                <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Trails</a>
+                <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">About Nepal</a>
+                <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Travel Guide</a>
+                <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm inline-block w-fit">API Docs</a>
+            </nav>
+        </div>
+    </div>
+</header>
+    <!-- New Hero Section -->
+<section class="relative bg-gray-900 text-white overflow-hidden">
+    <!-- Background image with overlay -->
+    <div class="absolute inset-0">
+        <img 
+            src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?ixlib=rb-1.2.1&auto=format&fit=crop&q=80" 
+            alt="Nepal Mountains" 
+            class="w-full h-full object-cover"
+        >
+        <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+    </div>
+    
+    <!-- Hero content -->
+    <div class="container mx-auto px-4 py-24 relative z-10">
+        <div class="max-w-3xl">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+                Discover Nepal's <span class="text-nepal-red">Breathtaking</span> Destinations
+            </h1>
+            <p class="text-xl mb-8">
+                From the highest mountains on earth to rich cultural heritage and lush jungles, explore the wonders Nepal has to offer.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="#destinations" class="bg-nepal-red hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                    Explore Destinations
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </a>
+                <a href="/api/docs/" class="bg-transparent hover:bg-white hover:text-nepal-blue border-2 border-white text-white hover:text-nepal-blue font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                    API Documentation
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Feature highlights -->
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-lg">
+                <div class="rounded-full bg-nepal-red bg-opacity-20 w-12 h-12 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-nepal-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Treks & Adventures</h3>
+                <p class="text-gray-300">World-famous treks with detailed route information and elevation profiles.</p>
+            </div>
+            <div class="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-lg">
+                <div class="rounded-full bg-nepal-red bg-opacity-20 w-12 h-12 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-nepal-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Cultural Heritage</h3>
+                <p class="text-gray-300">Discover ancient temples, historic cities, and vibrant cultural traditions.</p>
+            </div>
+            <div class="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-lg">
+                <div class="rounded-full bg-nepal-red bg-opacity-20 w-12 h-12 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-nepal-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Weather & Conditions</h3>
+                <p class="text-gray-300">Real-time weather updates and trail conditions for safe travel planning.</p>
+            </div>
+        </div>
+        
+        <!-- Scroll down indicator -->
+        <div class="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce">
+            <a href="#destinations" class="text-sm text-gray-300 mb-1">Scroll Down</a>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </div>
+    </div>
+</section>
+
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
         <!-- Search and Filter Controls -->
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800 relative">
+            Search All Destinations
+            <span class="block h-1 w-24 bg-nepal-red mt-2"></span>
+            </h2>
+        </div>
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="w-full md:w-1/3">
@@ -258,14 +385,188 @@
 
                         <!-- Modal Body -->
                         <div class="px-6 py-4">
+                           
                             <!-- Image Gallery -->
                             <div x-show="selectedDestination.photos && selectedDestination.photos.length > 0" class="mb-6">
-                                <img 
-                                    :src="selectedDestination.photos && selectedDestination.photos.length > 0 ? selectedDestination.photos[0].photo : ''"
-                                    :alt="selectedDestination.name"
-                                    class="w-full h-64 object-cover rounded-lg"
-                                    @error="$event.target.src='https://images.unsplash.com/photo-1544735716-392fe2489ffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60'"
+                                <!-- Main Image Display with Navigation -->
+                                
+                                <div class="relative bg-gray-100 rounded-lg overflow-hidden" style="min-height: 24rem;">
+                                    <template x-for="(photo, photoIndex) in selectedDestination.photos" :key="photoIndex">
+                                        <div 
+                                            x-show="currentPhotoIndex === photoIndex" 
+                                            class="absolute inset-0 w-full h-full transition-all duration-500"
+                                            x-transition:enter="transition ease-out duration-500"
+                                            x-transition:enter-start="opacity-0 transform scale-105"
+                                            x-transition:enter-end="opacity-100 transform scale-100"
+                                            x-transition:leave="transition ease-in duration-300"
+                                            x-transition:leave-start="opacity-100 transform scale-100"
+                                            x-transition:leave-end="opacity-0 transform scale-95"
+                                        >
+                                            <img 
+                                                :src="photo.photo"
+                                                :alt="selectedDestination.name + ' photo ' + (photoIndex + 1)"
+                                                class="w-full h-full object-cover cursor-pointer"
+                                                @click="toggleFullscreen()"
+                                                @error="$event.target.src='https://images.unsplash.com/photo-1544735716-392fe2489ffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60'"
+                                            >
+                                            <div 
+                                                x-show="photo.caption" 
+                                                class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm"
+                                                x-transition:enter="transition ease-out duration-300"
+                                                x-transition:enter-start="opacity-0 transform translate-y-2"
+                                                x-transition:enter-end="opacity-100 transform translate-y-0"
+                                            >
+                                                <p class="text-center" x-text="photo.caption"></p>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Expand icon in corner -->
+                                    <button 
+                                        @click="toggleFullscreen()" 
+                                        class="absolute top-3 right-3 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-2 rounded-full focus:outline-none transition-colors duration-200 z-10"
+                                        title="View fullscreen"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"></path>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- Navigation Arrows -->
+                                    <template x-if="selectedDestination.photos && selectedDestination.photos.length > 1">
+                                        <div>
+                                            <button 
+                                                @click="currentPhotoIndex = (currentPhotoIndex - 1 + selectedDestination.photos.length) % selectedDestination.photos.length"
+                                                class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-2 rounded-full focus:outline-none transition-all duration-200 hover:scale-110 z-10"
+                                                aria-label="Previous photo"
+                                            >
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                </svg>
+                                            </button>
+                                            <button 
+                                                @click="currentPhotoIndex = (currentPhotoIndex + 1) % selectedDestination.photos.length"
+                                                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-2 rounded-full focus:outline-none transition-all duration-200 hover:scale-110 z-10"
+                                                aria-label="Next photo"
+                                            >
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Image Counter -->
+                                    <div 
+                                        x-show="selectedDestination.photos && selectedDestination.photos.length > 1" 
+                                        class="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white text-xs px-3 py-1 rounded-full z-10"
+                                    >
+                                        <span x-text="currentPhotoIndex + 1"></span> / <span x-text="selectedDestination.photos.length"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Thumbnails Gallery -->
+                                <div 
+                                    x-show="selectedDestination.photos && selectedDestination.photos.length > 1" 
+                                    class="mt-4 grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 overflow-x-auto py-1 px-1"
                                 >
+                                    <template x-for="(photo, thumbIndex) in selectedDestination.photos" :key="thumbIndex">
+                                        <button 
+                                            @click="currentPhotoIndex = thumbIndex"
+                                            class="focus:outline-none transition-all duration-200 transform hover:scale-105 relative"
+                                            :class="{'ring-2 ring-nepal-red': currentPhotoIndex === thumbIndex}"
+                                        >
+                                            <img 
+                                                :src="photo.photo" 
+                                                :alt="'Thumbnail ' + (thumbIndex + 1)"
+                                                class="h-16 w-24 object-cover rounded-md"
+                                                @error="$event.target.src='https://images.unsplash.com/photo-1544735716-392fe2489ffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=60'"
+                                            >
+                                            <div 
+                                                x-show="currentPhotoIndex === thumbIndex" 
+                                                class="absolute inset-0 border-2 border-nepal-red rounded-md"
+                                            ></div>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Fullscreen Image Modal -->
+                            <div 
+                                x-show="fullscreenMode" 
+                                @keydown.window="keyboardNavigation"
+                                class="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center"
+                                x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0"
+                                x-transition:enter-end="opacity-100"
+                                x-transition:leave="transition ease-in duration-200"
+                                x-transition:leave-start="opacity-100"
+                                x-transition:leave-end="opacity-0"
+                                style="display: none;"
+                            >
+                                <button 
+                                    @click.stop="toggleFullscreen()"
+                                    class="absolute top-4 right-4 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-2 rounded-full focus:outline-none z-50"
+                                >
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                
+                                <!-- Main fullscreen image -->
+                                <div class="relative w-full h-full flex items-center justify-center p-8">
+                                    <template x-for="(photo, photoIndex) in selectedDestination.photos" :key="photoIndex">
+                                        <div 
+                                            x-show="currentPhotoIndex === photoIndex" 
+                                            class="transition-opacity duration-300 max-w-full max-h-full"
+                                            x-transition:enter="transition ease-out duration-300"
+                                            x-transition:enter-start="opacity-0 scale-95"
+                                            x-transition:enter-end="opacity-100 scale-100"
+                                            x-transition:leave="transition ease-in duration-200"
+                                            x-transition:leave-start="opacity-100 scale-100"
+                                            x-transition:leave-end="opacity-0 scale-95"
+                                        >
+                                            <img 
+                                                :src="photo.photo"
+                                                :alt="selectedDestination.name + ' photo ' + (photoIndex + 1)"
+                                                class="max-w-full max-h-[80vh] mx-auto object-contain"
+                                                @error="$event.target.src='https://images.unsplash.com/photo-1544735716-392fe2489ffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80'"
+                                            >
+                                            <p 
+                                                x-show="photo.caption" 
+                                                class="text-white text-center mt-4 max-w-2xl mx-auto"
+                                                x-text="photo.caption"
+                                            ></p>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Navigation buttons -->
+                                    <template x-if="selectedDestination.photos && selectedDestination.photos.length > 1">
+                                        <div>
+                                            <button 
+                                                @click="currentPhotoIndex = (currentPhotoIndex - 1 + selectedDestination.photos.length) % selectedDestination.photos.length"
+                                                class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-4 rounded-full focus:outline-none transition-all duration-200 hover:scale-110"
+                                            >
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                </svg>
+                                            </button>
+                                            <button 
+                                                @click="currentPhotoIndex = (currentPhotoIndex + 1) % selectedDestination.photos.length"
+                                                class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-4 rounded-full focus:outline-none transition-all duration-200 hover:scale-110"
+                                            >
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Image counter -->
+                                    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm">
+                                        <span x-text="currentPhotoIndex + 1"></span> / <span x-text="selectedDestination.photos.length"></span>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Destination Info -->
@@ -452,9 +753,14 @@
                 selectedRegion: '',
                 loading: true,
                 showModal: false,
+                currentPhotoIndex: 0, // Add this line to track the current photo
+                fullscreenMode: false,
                 
                 init() {
                     this.loadDestinations();
+                    
+                    // Add keyboard navigation
+                    window.addEventListener('keydown', (e) => this.keyboardNavigation(e));
                 },
                 
                 loadDestinations() {
@@ -491,7 +797,43 @@
                 
                 viewDestinationDetails(destination) {
                     this.selectedDestination = destination;
+                    this.currentPhotoIndex = 0; // Reset to the first photo when opening modal
                     this.showModal = true;
+                },
+
+                toggleFullscreen() {
+                    this.fullscreenMode = !this.fullscreenMode;
+                    
+                    // When entering fullscreen, ensure body doesn't scroll
+                    if (this.fullscreenMode) {
+                        document.body.classList.add('overflow-hidden');
+                        console.log('Entered fullscreen mode');
+                    } else {
+                        document.body.classList.remove('overflow-hidden');
+                        console.log('Exited fullscreen mode');
+                    }
+                    
+                    // Prevent event propagation
+                    event.stopPropagation();
+                },
+                
+                keyboardNavigation(e) {
+                    if (!this.showModal) return;
+                    
+                    // Add this check to prevent errors
+                    if (!this.selectedDestination.photos || !this.selectedDestination.photos.length) return;
+                    
+                    if (e.key === 'ArrowRight') {
+                        this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.selectedDestination.photos.length;
+                    } else if (e.key === 'ArrowLeft') {
+                        this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.selectedDestination.photos.length) % this.selectedDestination.photos.length;
+                    } else if (e.key === 'Escape') {
+                        if (this.fullscreenMode) {
+                            this.fullscreenMode = false;
+                        } else {
+                            this.showModal = false;
+                        }
+                    }
                 }
             };
         }
