@@ -126,6 +126,17 @@ class DestinationViewSet(CachedReadOnlyModelViewSet):
         heritage = self.queryset.filter(type='heritage')
         serializer = self.get_serializer(heritage, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True)
+    def recommendations(self, request, pk=None):
+        """Get recommended destinations similar to this one"""
+        from api.services.recommendations import RecommendationService
+        
+        limit = int(request.query_params.get('limit', 5))
+        recommendations = RecommendationService.get_destination_recommendations(pk, limit)
+        
+        serializer = self.get_serializer(recommendations, many=True)
+        return Response(serializer.data)
 
 
 class LodgingViewSet(CachedReadOnlyModelViewSet):

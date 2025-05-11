@@ -61,7 +61,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 font-sans" x-data="{ mobileMenuOpen: false }">
+<body class="bg-gray-50 font-sans" x-data="{ mobileMenuOpen: false, showLoginModal: false }">
     <!-- Modern Navbar -->
     <header class="bg-nepal-blue text-white sticky top-0 z-40">
         <div class="container mx-auto px-4">
@@ -108,6 +108,39 @@
                         </div>
                     </div>
                     <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">API Docs</a>
+
+                    <!-- Add this after the API Docs link in your desktop nav -->
+                    <div class="relative ml-3">
+                        <!-- Show login button when not authenticated -->
+                        <template x-if="!$store.auth.isAuthenticated">
+                            <button @click="showLoginModal = true" class="bg-white text-nepal-blue hover:bg-gray-100 font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">
+                                Login
+                            </button>
+                        </template>
+                        
+                        <!-- Show user menu when authenticated -->
+                        <template x-if="$store.auth.isAuthenticated">
+                            <div x-data="{ userMenuOpen: false }" class="relative">
+                                <button @click="userMenuOpen = !userMenuOpen" class="flex items-center bg-white text-nepal-blue px-4 py-2 rounded-full">
+                                    <span x-text="$store.auth.user?.username || 'User'" class="text-sm font-medium"></span>
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                
+                                <div x-show="userMenuOpen" @click.away="userMenuOpen = false" 
+                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50"
+                                    x-cloak>
+                                    <span x-text="$store.auth.user?.username || 'User'" class="block px-4 py-2 text-sm text-gray-700 font-medium border-b"></span>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                    <a href="#" @click.prevent="$store.auth.logout(); window.location.reload();" 
+                                    class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Sign out</a>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    
                 </nav>
             </div>
             
@@ -121,8 +154,28 @@
                     <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">About Nepal</a>
                     <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Travel Guide</a>
                     <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm inline-block w-fit">API Docs</a>
+
+                    <!-- Add this to your mobile nav section -->
+                    <template x-if="!$store.auth.isAuthenticated">
+                        <a @click.prevent="showLoginModal = true" href="#" 
+                        class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">
+                            Login
+                        </a>
+                    </template>
+                    <template x-if="$store.auth.isAuthenticated">
+                        <div class="py-2">
+                            <span class="font-medium text-sm uppercase tracking-wider">
+                                Logged in as: <span x-text="$store.auth.user?.username || 'User'" class="text-nepal-red"></span>
+                            </span>
+                            <a @click.prevent="$store.auth.logout(); window.location.reload();" href="#"
+                            class="block mt-2 hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">
+                                Sign out
+                            </a>
+                        </div>
+                    </template>
                 </nav>
             </div>
+            
         </div>
     </header>
 
@@ -538,5 +591,226 @@
             </div>
         </div>
     </footer>
+
+<!--login form -->
+    <div x-show="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" x-cloak>
+        <div @click.away="showLoginModal = false" class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Login</h3>
+                <button @click="showLoginModal = false" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="loginForm" x-data="loginHandler()" @submit.prevent="login">
+                <div class="mb-4">
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input type="text" id="username" name="username" required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="w-full bg-nepal-blue text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue">
+                        Sign In
+                    </button>
+                </div>
+                
+                <div id="loginError" class="mt-3 text-red-600 text-sm hidden"></div>
+            </form>
+        </div>
+    </div>
+
+{% comment %} 
+    <div class="fixed bottom-4 right-4 bg-white p-2 rounded shadow-lg z-50 text-xs">
+        <p>Status: <span x-text="$store.auth?.isAuthenticated ? 'Authenticated' : 'Not Authenticated'"></span></p>
+        <button @click="showLoginModal = true" class="bg-blue-500 text-white px-2 py-1 rounded mt-1">Login</button>
+    </div> {% endcomment %}
+
+    <!-- Add this script to your templates -->
+<script>
+    // For shared auth functionality across components
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('auth', {
+            token: localStorage.getItem('token') || null,
+            user: JSON.parse(localStorage.getItem('user') || 'null'),
+            isAuthenticated: false,
+
+            init() {
+                this.isAuthenticated = !!this.token;
+            },
+
+            async login(username, password) {
+                try {
+                    const response = await fetch('/api/token/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username, password }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Login failed');
+                    }
+
+                    const data = await response.json();
+                    
+                    // Store tokens
+                    localStorage.setItem('token', data.access);
+                    localStorage.setItem('refresh_token', data.refresh);
+                    
+                    // Get user info (optional)
+                    const userResponse = await fetch('/api/v1/users/me/', {
+                        headers: {
+                            'Authorization': `Bearer ${data.access}`
+                        }
+                    });
+                    
+                    if (userResponse.ok) {
+                        const userData = await userResponse.json();
+                        localStorage.setItem('user', JSON.stringify(userData));
+                        this.user = userData;
+                    }
+                    
+                    this.token = data.access;
+                    this.isAuthenticated = true;
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Login error:', error);
+                    return false;
+                }
+            },
+
+            logout() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('user');
+                this.token = null;
+                this.user = null;
+                this.isAuthenticated = false;
+            },
+
+            // Helper to get the authorization header for API requests
+            getAuthHeader() {
+                return this.token ? { 'Authorization': `Bearer ${this.token}` } : {};
+            },
+
+            // Function to handle token refresh
+            async refreshToken() {
+                const refreshToken = localStorage.getItem('refresh_token');
+                if (!refreshToken) {
+                    this.logout();
+                    return false;
+                }
+
+                try {
+                    const response = await fetch('/api/token/refresh/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ refresh: refreshToken }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Token refresh failed');
+                    }
+
+                    const data = await response.json();
+                    localStorage.setItem('token', data.access);
+                    this.token = data.access;
+                    return true;
+                } catch (error) {
+                    this.logout();
+                    return false;
+                }
+            }
+        });
+    });
+
+    // Add this to your script section
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize auth state from localStorage
+        if (Alpine.store('auth')) {
+            Alpine.store('auth').isAuthenticated = !!Alpine.store('auth').token;
+        }
+    });
+
+    // Login functionality in the form
+    function loginHandler() {
+        return {
+            errorMessage: '',
+            
+            async login() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const errorElem = document.getElementById('loginError');
+                
+                try {
+                    const auth = Alpine.store('auth');
+                    const success = await auth.login(username, password);
+                    
+                    if (success) {
+                        // Close modal and refresh page to update UI
+                        this.showLoginModal = false;
+                        window.location.reload();
+                    } else {
+                        errorElem.textContent = 'Invalid username or password';
+                        errorElem.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    errorElem.textContent = 'Login failed. Please try again.';
+                    errorElem.classList.remove('hidden');
+                }
+            }
+        };
+    }
+
+    // Add this to your main JavaScript
+    // Create a wrapper for fetch that handles token refresh
+    async function authenticatedFetch(url, options = {}) {
+        const auth = Alpine.store('auth');
+        if (!auth.isAuthenticated) {
+            return fetch(url, options);
+        }
+        
+        // Add authorization header
+        const authOptions = {
+            ...options,
+            headers: {
+                ...options.headers,
+                ...auth.getAuthHeader()
+            }
+        };
+        
+        // Try the request
+        let response = await fetch(url, authOptions);
+        
+        // If unauthorized, try to refresh token and retry
+        if (response.status === 401) {
+            const refreshed = await auth.refreshToken();
+            if (refreshed) {
+                // Update headers with new token
+                authOptions.headers = {
+                    ...authOptions.headers,
+                    ...auth.getAuthHeader()
+                };
+                // Retry request
+                response = await fetch(url, authOptions);
+            }
+        }
+        
+        return response;
+    }
+</script>
 </body>
 </html>
