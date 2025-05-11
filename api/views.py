@@ -35,9 +35,9 @@ class CachedReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
 
 # Custom filter sets for handling ArrayFields
 class DestinationFilterSet(FilterSet):
-    best_season = CharFilter(field_name='best_season', lookup_expr='contains')
-    permits_required = CharFilter(field_name='permits_required', lookup_expr='contains')
-    highlights = CharFilter(field_name='highlights', lookup_expr='contains')
+    best_season = CharFilter(field_name='best_season', lookup_expr='icontains')
+    permits_required = CharFilter(field_name='permits_required', lookup_expr='icontains')
+    highlights = CharFilter(field_name='highlights', lookup_expr='icontains')
 
     class Meta:
         model = Destination
@@ -45,7 +45,7 @@ class DestinationFilterSet(FilterSet):
 
 
 class LodgingFilterSet(FilterSet):
-    amenities = CharFilter(field_name='amenities', lookup_expr='contains')
+    amenities = CharFilter(field_name='amenities', lookup_expr='icontains')
     
     class Meta:
         model = Lodging
@@ -53,9 +53,9 @@ class LodgingFilterSet(FilterSet):
 
 
 class GuideFilterSet(FilterSet):
-    languages = CharFilter(field_name='languages', lookup_expr='contains')
-    regions = CharFilter(field_name='regions', lookup_expr='contains')
-    specialization = CharFilter(field_name='specialization', lookup_expr='contains')
+    languages = CharFilter(field_name='languages', lookup_expr='icontains')
+    regions = CharFilter(field_name='regions', lookup_expr='icontains')
+    specialization = CharFilter(field_name='specialization', lookup_expr='icontains')
     
     class Meta:
         model = Guide
@@ -63,8 +63,8 @@ class GuideFilterSet(FilterSet):
 
 
 class AgencyFilterSet(FilterSet):
-    regions = CharFilter(field_name='regions', lookup_expr='contains')
-    services = CharFilter(field_name='services', lookup_expr='contains')
+    regions = CharFilter(field_name='regions', lookup_expr='icontains')
+    services = CharFilter(field_name='services', lookup_expr='icontains')
     
     class Meta:
         model = Agency
@@ -72,7 +72,7 @@ class AgencyFilterSet(FilterSet):
 
 
 class PermitFilterSet(FilterSet):
-    regions = CharFilter(field_name='regions', lookup_expr='contains')
+    regions = CharFilter(field_name='regions', lookup_expr='icontains')
     
     class Meta:
         model = Permit
@@ -80,7 +80,7 @@ class PermitFilterSet(FilterSet):
 
 
 class EventFilterSet(FilterSet):
-    activities = CharFilter(field_name='activities', lookup_expr='contains')
+    activities = CharFilter(field_name='activities', lookup_expr='icontains')
     
     class Meta:
         model = Event
@@ -98,6 +98,9 @@ def weather_page(request):
     return render(request, 'weather.html')
 def trail_page(request):
     return render(request, 'trails.html')
+def lodgings_page(request):
+    return render(request, 'lodgings.html')
+
 
 class DestinationViewSet(CachedReadOnlyModelViewSet):
     """
