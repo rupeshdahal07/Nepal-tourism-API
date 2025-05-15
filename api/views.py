@@ -88,8 +88,15 @@ class EventFilterSet(FilterSet):
 
 
 def home_page(request):
-    """Render the home page"""
-    return render(request, 'home.html')
+    """Home page view"""
+    # Check if user was redirected here for login
+    show_login = 'next' in request.GET
+    
+    context = {
+        'show_login': show_login,
+        'next': request.GET.get('next', '/')
+    }
+    return render(request, 'home.html', context)
 
 def destinations_page(request):
     return render(request, 'destinations.html')
@@ -355,3 +362,72 @@ class TourismStatViewSet(CachedReadOnlyModelViewSet):
             return Response(serializer.data)
         except ValueError:
             return Response({"error": "Year must be a valid integer"}, status=400)
+        
+
+
+
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import Http404
+from .models import APIKey
+
+@login_required
+def api_keys_view(request):
+    """View for displaying and managing API keys"""
+    api_keys = APIKey.objects.filter(user=request.user, is_active=True).order_by('-created_at')
+    
+    context = {
+        'api_keys': api_keys,
+        # Pass new_api_key to the template if it exists in session
+        'new_api_key': request.session.pop('new_api_key', None)
+    }
+    return render(request, 'api_keys.html', context)
+
+@login_required
+def generate_api_key(request):
+    """Handle API key generation"""
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        tier = request.POST.get('tier', 'free')
+        
+        # Generate a new API key
+        key_value = APIKey.generate_key()
+        
+        # Create the API key in the database
+        api_key = APIKey.objects.create(
+            key=key_value,
+            name=name,
+            user=request.user,
+            email=request.user.email,
+            tier=tier
+        )
+        
+        # Store the key value in session to display it once
+        request.session['new_api_key'] = key_value
+        messages.success(request, f"API key '{name}' created successfully")
+        
+        return redirect('api_keys')
+    
+    return redirect('api_keys')
+
+@login_required
+def revoke_api_key(request, key):
+    """Revoke (deactivate) an API key"""
+    try:
+        api_key = APIKey.objects.get(key=key, user=request.user)
+        
+        if request.method == 'POST':
+            # Deactivate the key instead of deleting it
+            api_key.is_active = False
+            api_key.save()
+            
+            messages.success(request, f"API key '{api_key.name}' has been revoked")
+        
+        return redirect('api_keys')
+        
+    except APIKey.DoesNotExist:
+        raise Http404("API key not found")

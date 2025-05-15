@@ -61,7 +61,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 font-sans" x-data="{ mobileMenuOpen: false, showLoginModal: false }">
+<body class="bg-gray-50 font-sans" x-data="{ mobileMenuOpen: false, showLoginModal: {% if show_login %}true{% else %}false{% endif %} }">
     <!-- Modern Navbar -->
     <header class="bg-nepal-blue text-white sticky top-0 z-40">
         <div class="container mx-auto px-4">
@@ -108,6 +108,7 @@
                         </div>
                     </div>
                     <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">API Docs</a>
+                    <a href="{% url 'api_keys' %}" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">API Keys</a>
 
                     <!-- Add this after the API Docs link in your desktop nav -->
                     <div class="relative ml-3">
@@ -278,224 +279,246 @@
 
 
 
-    <!-- Features Section -->
-    <section id="features" class="py-20">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Comprehensive Nepal Tourism Data</h2>
-                <p class="max-w-3xl mx-auto text-gray-600 text-lg">Access detailed information about Nepal's tourist destinations, trekking routes, real-time weather, and more through our powerful API endpoints.</p>
+<!-- filepath: d:\DRF_\nepal_tourism_api\templates\home.html -->
+<!-- Features Section -->
+<section id="features" class="py-24 bg-gradient-to-b from-white to-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-20">
+            <div class="inline-block px-3 py-1 bg-nepal-blue/10 text-nepal-blue rounded-full text-sm font-medium tracking-wide mb-3">
+                EXPLORE NEPAL
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Feature 1 -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-105">
-                    <div class="h-48 bg-nepal-blue flex items-center justify-center">
-                        <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">Experience the Wonders of Nepal</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 text-lg">Discover the breathtaking beauty, ancient culture, and unforgettable adventures awaiting you in the heart of the Himalayas.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+            <!-- Main Feature -->
+            <div class="md:col-span-8">
+                <div class="relative overflow-hidden rounded-2xl shadow-xl h-full bg-nepal-blue">
+                    <div class="absolute inset-0 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1516382799247-87df95d790b7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80" 
+                             alt="Everest Base Camp Trek" 
+                             class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-nepal-blue/90 via-nepal-blue/40 to-transparent"></div>
                     </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Tourist Destinations</h3>
-                        <p class="text-gray-600">Comprehensive information on over 20+ destinations including treks, heritage sites, cultural spots, and leisure locations across Nepal.</p>
-                        <div class="mt-4">
-                            <a href="/destinations" class="text-nepal-red font-medium flex items-center">
-                                Explore Destinations
-                                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    <div class="relative p-8 md:p-12 flex flex-col h-full justify-end">
+                        <span class="bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-3 py-1 rounded-full w-fit mb-4">FEATURED TREK</span>
+                        <h3 class="text-3xl font-bold text-white mb-3">Everest Base Camp Trek</h3>
+                        <p class="text-white/90 text-lg mb-6">Journey to the foot of the world's tallest mountain through breathtaking landscapes and traditional Sherpa villages.</p>
+                        <div class="flex flex-wrap gap-4 mb-6">
+                            <div class="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-lg flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                            </a>
+                                <span class="text-sm text-white">14 days</span>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-lg flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <span class="text-sm text-white">5,364m altitude</span>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-lg flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="text-sm text-white">Moderate-Difficult</span>
+                            </div>
                         </div>
+                        <a href="{% url 'trail_page' %}" class="inline-flex items-center bg-white text-nepal-blue hover:bg-gray-100 font-semibold py-3 px-6 rounded-lg transition-colors w-fit">
+                            Explore Trek Details
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </a>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Side Features -->
+            <div class="md:col-span-4 grid grid-cols-1 gap-8">
+                <!-- Weather Info -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <svg class="w-6 h-6 text-nepal-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 ml-3">Weather Updates</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Real-time weather conditions for all major trekking regions and tourist destinations in Nepal.</p>
+                    <a href="/weather" class="text-nepal-blue font-medium flex items-center hover:underline">
+                        Check Current Weather
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
                 
-                <!-- Feature 2 -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-105">
-                    <div class="h-48 bg-nepal-red flex items-center justify-center">
-                        <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <!-- Accommodation -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <svg class="w-6 h-6 text-nepal-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 ml-3">Places to Stay</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Find accommodations from luxury hotels to authentic teahouses along popular trekking routes.</p>
+                    <a href="{% url 'lodgings_page' %}" class="text-nepal-red font-medium flex items-center hover:underline">
+                        Browse Accommodations
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Service Categories -->
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Category 1 -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all">
+                <div class="h-48 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1544564789-b9ba7aeaf711?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                         alt="Heritage Sites" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Cultural Heritage</h3>
+                    <p class="text-gray-600 mb-4">Explore UNESCO World Heritage sites, ancient temples, and vibrant cultural experiences across Nepal.</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">Kathmandu Valley</span>
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">Lumbini</span>
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">Bhaktapur</span>
+                    </div>
+                    <a href="/destinations?type=heritage" class="text-nepal-blue font-medium flex items-center">
+                        Discover Heritage Sites
+                        <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Category 2 -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all">
+                <div class="h-48 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1531700968341-bd114e5006ec?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                         alt="Adventure Activities" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Adventure Activities</h3>
+                    <p class="text-gray-600 mb-4">Thrilling outdoor experiences from white water rafting to paragliding in stunning natural settings.</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">Paragliding</span>
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">Rafting</span>
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">Mountain Biking</span>
+                    </div>
+                    <a href="/activities" class="text-nepal-blue font-medium flex items-center">
+                        Find Adventures
+                        <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Category 3 -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all">
+                <div class="h-48 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1606044034970-2398157a904f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                         alt="Local Experiences" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Local Experiences</h3>
+                    <p class="text-gray-600 mb-4">Immerse yourself in authentic Nepali culture with homestays, cooking classes, and traditional festivals.</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">Cultural Shows</span>
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">Homestays</span>
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">Festivals</span>
+                    </div>
+                    <a href="/experiences" class="text-nepal-blue font-medium flex items-center">
+                        Experience Local Culture
+                        <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- API Features -->
+        <div class="mt-24 text-center">
+            <div class="inline-block px-3 py-1 bg-nepal-red/10 text-nepal-red rounded-full text-sm font-medium tracking-wide mb-3">
+                API SERVICES
+            </div>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Power Your Applications with Our Data</h2>
+            <p class="max-w-2xl mx-auto text-gray-600 mb-12">Access comprehensive tourism data through our modern, well-documented API to create innovative travel applications.</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- API Feature 1 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all">
+                    <div class="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Destination Data</h3>
+                    <p class="text-gray-600 text-sm">Comprehensive information on popular destinations, including attractions, best times to visit, and cultural significance.</p>
+                </div>
+                
+                <!-- API Feature 2 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all">
+                    <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Trekking Routes</h3>
+                    <p class="text-gray-600 text-sm">Detailed trail information with elevation profiles, difficulty ratings, permit requirements, and accommodation options.</p>
+                </div>
+                
+                <!-- API Feature 3 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all">
+                    <div class="bg-yellow-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
                         </svg>
                     </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Weather Data</h3>
-                        <p class="text-gray-600">Real-time weather information and forecasts for key locations, including mountain-specific data with elevation adjustments.</p>
-                        <div class="mt-4">
-                            <a href="/weather" class="text-nepal-red font-medium flex items-center">
-                                Check Weather
-                                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Weather API</h3>
+                    <p class="text-gray-600 text-sm">Real-time and forecast weather data for major tourism regions, including temperature, precipitation, and seasonal conditions.</p>
                 </div>
                 
-                <!-- Feature 3 -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-105">
-                    <div class="h-48 bg-nepal-blue flex items-center justify-center">
-                        <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Trail Information</h3>
-                        <p class="text-gray-600">Detailed trail routes, status updates, and alerts for all major trekking trails including difficulty levels and elevation profiles.</p>
-                        <div class="mt-4">
-                            <a href="#" class="text-nepal-red font-medium flex items-center">
-                                View Trails
-                                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Feature 4 -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-105">
-                    <div class="h-48 bg-nepal-red flex items-center justify-center">
-                        <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <!-- API Feature 4 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all">
+                    <div class="bg-red-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                         </svg>
                     </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Accommodation</h3>
-                        <p class="text-gray-600">Lodging options at various locations with detailed amenity information, pricing ranges, and availability status.</p>
-                        <div class="mt-4">
-                            <a href="#" class="text-nepal-red font-medium flex items-center">
-                                Find Lodging
-                                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Feature 5 -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-105">
-                    <div class="h-48 bg-nepal-blue flex items-center justify-center">
-                        <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Guides & Agencies</h3>
-                        <p class="text-gray-600">Information about licensed guides and trekking agencies, including specializations, ratings, experience, and contact details.</p>
-                        <div class="mt-4">
-                            <a href="#" class="text-nepal-red font-medium flex items-center">
-                                Find Guides
-                                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Feature 6 -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform hover:scale-105">
-                    <div class="h-48 bg-nepal-red flex items-center justify-center">
-                        <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Events & Tourism Stats</h3>
-                        <p class="text-gray-600">Cultural events calendar and tourism statistics providing insights on visitor trends, popular destinations, and seasonal patterns.</p>
-                        <div class="mt-4">
-                            <a href="#" class="text-nepal-red font-medium flex items-center">
-                                View Events
-                                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Accommodation</h3>
+                    <p class="text-gray-600 text-sm">Lodging options throughout Nepal, from luxury hotels to teahouses, with pricing, amenities, and availability information.</p>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- API Documentation Overview -->
-    <section class="py-20 bg-gray-100">
-        <div class="container mx-auto px-4">
-            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-                <div class="md:flex">
-                    <div class="md:w-1/2 bg-nepal-blue p-12 text-white">
-                        <h2 class="text-3xl font-bold mb-6">API Documentation</h2>
-                        <p class="text-white/90 text-lg mb-6">Our comprehensive API provides developers with rich data access through RESTful endpoints. Build applications, websites, or mobile apps using our carefully crafted tourism data.</p>
-                        <ul class="space-y-3 mb-8">
-                            <li class="flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                JSON and REST API architecture
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Token-based authentication
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Filtering, searching, and pagination
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Versioned API for stability
-                            </li>
-                        </ul>
-                        <div class="flex space-x-4">
-                            <a href="/api/docs/" class="bg-white text-nepal-blue font-bold py-3 px-6 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center">
-                                <span>Swagger UI</span>
-                                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                </svg>
-                            </a>
-                            <a href="/api/redoc/" class="bg-nepal-red text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition-colors duration-300 flex items-center">
-                                <span>ReDoc</span>
-                                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="md:w-1/2 p-8 md:p-12">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Sample API Request</h3>
-                        <div class="bg-gray-800 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
-                            <pre>GET /api/v1/destinations/?region=Khumbu&type=trek
-                            <span class="text-blue-400">Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</span>
-                            <span class="text-green-400">Content-Type: application/json</span></pre>
-                        </div>
-                        <h3 class="text-xl font-semibold mt-8 mb-4 text-gray-800">Sample API Response</h3>
-                        <div class="bg-gray-800 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
-                            <pre>[
-                                {
-                                    <span class="text-blue-400">"id"</span>: <span class="text-green-400">"everest-base-camp"</span>,
-                                    <span class="text-blue-400">"name"</span>: <span class="text-green-400">"Everest Base Camp"</span>,
-                                    <span class="text-blue-400">"type"</span>: <span class="text-green-400">"trek"</span>,
-                                    <span class="text-blue-400">"region"</span>: <span class="text-green-400">"Khumbu"</span>,
-                                    <span class="text-blue-400">"description"</span>: <span class="text-green-400">"The classic trek to the foot of the world's highest mountain"</span>,
-                                    <span class="text-blue-400">"difficulty"</span>: <span class="text-green-400">"hard"</span>,
-                                    <span class="text-blue-400">"duration"</span>: <span class="text-orange-400">14</span>,
-                                    <span class="text-blue-400">"max_elevation"</span>: <span class="text-orange-400">5545</span>,
-                                    <span class="text-blue-400">"min_elevation"</span>: <span class="text-orange-400">2800</span>,
-                                    <span class="text-blue-400">"best_season"</span>: [<span class="text-green-400">"March"</span>, <span class="text-green-400">"April"</span>, <span class="text-green-400">"May"</span>, <span class="text-green-400">"September"</span>, <span class="text-green-400">"October"</span>],
-                                    ...
-                                }
-                                ]</pre>
-                        </div>
-                    </div>
-                </div>
+            
+            <div class="mt-12">
+                <a href="/api/docs/" class="inline-flex items-center justify-center bg-nepal-blue hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-lg hover:shadow-blue-700/30">
+                    <span class="flex items-center">
+                        Explore API Documentation
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </span>
+                </a>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
     <!-- Stats Counter Section -->
     <section class="py-20 bg-nepal-blue text-white">
@@ -605,6 +628,7 @@
             </div>
             
             <form id="loginForm" x-data="loginHandler()" @submit.prevent="login">
+                <input type="hidden" id="next" name="next" value="{{ next }}">
                 <div class="mb-4">
                     <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                     <input type="text" id="username" name="username" required 
@@ -753,6 +777,7 @@
             async login() {
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
+                const nextUrl = document.getElementById('next').value || '/';
                 const errorElem = document.getElementById('loginError');
                 
                 try {
@@ -760,9 +785,9 @@
                     const success = await auth.login(username, password);
                     
                     if (success) {
-                        // Close modal and refresh page to update UI
+                        // Close modal and redirect to next URL
                         this.showLoginModal = false;
-                        window.location.reload();
+                        window.location.href = nextUrl;
                     } else {
                         errorElem.textContent = 'Invalid username or password';
                         errorElem.classList.remove('hidden');

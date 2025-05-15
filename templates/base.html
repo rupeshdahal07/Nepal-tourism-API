@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepal Tourism API - Comprehensive Data for Nepal's Tourist Destinations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js for reactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Custom Tailwind config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nepal: {
+                            red: '#DC143C',
+                            blue: '#003893'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 1s ease-in-out',
+                        'fade-in-up': 'fadeInUp 1s ease-out',
+                        'fade-in-down': 'fadeInDown 0.7s ease-out',
+                        'subtle-zoom': 'subtleZoom 20s ease-in-out infinite',
+                        'mouse-scroll': 'mouseScroll 1.5s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        fadeInDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        subtleZoom: {
+                            '0%': { transform: 'scale(1.05)' },
+                            '50%': { transform: 'scale(1.1)' },
+                            '100%': { transform: 'scale(1.05)' }
+                        },
+                        mouseScroll: {
+                            '0%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(6px)' },
+                            '100%': { transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-sans" x-data="{ mobileMenuOpen: false, showLoginModal: false }">
+    <!-- Modern Navbar -->
+    <header class="bg-nepal-blue text-white sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <!-- Top nav section with logo -->
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <a href="/" class="flex items-center space-x-2">
+                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 3L12 9L6 3H4V21H6V8L12 14L18 8V21H20V3H18Z" fill="currentColor"/>
+                    </svg>
+                    <span class="font-bold text-xl tracking-tight">Nepal Tourism</span>
+                </a>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="text-white hover:text-nepal-red focus:outline-none">
+                        <svg class="h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="h-6 w-6" x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Desktop nav links -->
+                <nav class="hidden md:flex md:items-center md:space-x-8">
+                    <a href="/" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 border-b-2 border-nepal-red pb-1">Home</a>
+                    <a href="/destinations" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Destinations</a>
+                    <a href="/weather" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Weather</a>
+                    <a href="{% url "trail_page" %}" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Trails</a>
+                    <a href="{% url "lodgings_page" %}" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Lodging</a>
+                    <div class="relative group">
+                        <button class="flex items-center hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">
+                            Info
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">About Nepal</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Travel Guide</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">FAQ</a>
+                        </div>
+                    </div>
+                    <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">API Docs</a>
+
+                    <!-- Add this after the API Docs link in your desktop nav -->
+                    <div class="relative ml-3">
+                        <!-- Show login button when not authenticated -->
+                        <template x-if="!$store.auth.isAuthenticated">
+                            <button @click="showLoginModal = true" class="bg-white text-nepal-blue hover:bg-gray-100 font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">
+                                Login
+                            </button>
+                        </template>
+                        
+                        <!-- Show user menu when authenticated -->
+                        <template x-if="$store.auth.isAuthenticated">
+                            <div x-data="{ userMenuOpen: false }" class="relative">
+                                <button @click="userMenuOpen = !userMenuOpen" class="flex items-center bg-white text-nepal-blue px-4 py-2 rounded-full">
+                                    <span x-text="$store.auth.user?.username || 'User'" class="text-sm font-medium"></span>
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                
+                                <div x-show="userMenuOpen" @click.away="userMenuOpen = false" 
+                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50"
+                                    x-cloak>
+                                    <span x-text="$store.auth.user?.username || 'User'" class="block px-4 py-2 text-sm text-gray-700 font-medium border-b"></span>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                    <a href="#" @click.prevent="$store.auth.logout(); window.location.reload();" 
+                                    class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Sign out</a>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            <!-- Mobile nav links -->
+            <div class="md:hidden transition-all duration-300 ease-in-out max-h-0 overflow-hidden" :class="{'max-h-96': mobileMenuOpen, 'max-h-0': !mobileMenuOpen}">
+                <nav class="flex flex-col space-y-3 pb-3">
+                    <a href="/" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Home</a>
+                    <a href="/destinations" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Destinations</a>
+                    <a href="/weather" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Weather</a>
+                    <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Trails</a>
+                    <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">About Nepal</a>
+                    <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Travel Guide</a>
+                    <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm inline-block w-fit">API Docs</a>
+
+                    <!-- Add this to your mobile nav section -->
+                    <template x-if="!$store.auth.isAuthenticated">
+                        <a @click.prevent="showLoginModal = true" href="#" 
+                        class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">
+                            Login
+                        </a>
+                    </template>
+                    <template x-if="$store.auth.isAuthenticated">
+                        <div class="py-2">
+                            <span class="font-medium text-sm uppercase tracking-wider">
+                                Logged in as: <span x-text="$store.auth.user?.username || 'User'" class="text-nepal-red"></span>
+                            </span>
+                            <a @click.prevent="$store.auth.logout(); window.location.reload();" href="#"
+                            class="block mt-2 hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">
+                                Sign out
+                            </a>
+                        </div>
+                    </template>
+                </nav>
+            </div>
+            
+        </div>
+    </header>
+
+    <!-- Main content -->
+  
+        {% block content %}
+        {% endblock %}
+
+   <!-- Footer -->
+    <footer class="bg-nepal-blue text-white">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Nepal Tourism API</h3>
+                    <p class="text-gray-300">Comprehensive data on Nepal's tourist destinations, weather, trails, and more.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">API Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/api/docs/" class="text-gray-300 hover:text-white">API Documentation</a></li>
+                        <li><a href="/api/redoc/" class="text-gray-300 hover:text-white">ReDoc Documentation</a></li>
+                        <li><a href="/api/v1/" class="text-gray-300 hover:text-white">API Endpoints</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Categories</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/destinations" class="text-gray-300 hover:text-white">Destinations</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Trekking Routes</a></li>
+                        <li><a href="/weather" class="text-gray-300 hover:text-white">Weather Data</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Lodging Options</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                    <p class="text-gray-300">info@nepaltourismapi.com</p>
+                    <p class="text-gray-300">+977 1 XXXX XXX</p>
+                    <div class="mt-4 flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white">
+                            <span class="sr-only">Twitter</span>
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white">
+                            <span class="sr-only">GitHub</span>
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12 pt-8 border-t border-white/20 text-center">
+                <p class="text-gray-300">&copy; 2025 Nepal Tourism API. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+<!--login form -->
+    <div x-show="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" x-cloak>
+        <div @click.away="showLoginModal = false" class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Login</h3>
+                <button @click="showLoginModal = false" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="loginForm" x-data="loginHandler()" @submit.prevent="login">
+                <div class="mb-4">
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input type="text" id="username" name="username" required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="w-full bg-nepal-blue text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue">
+                        Sign In
+                    </button>
+                </div>
+                
+                <div id="loginError" class="mt-3 text-red-600 text-sm hidden"></div>
+            </form>
+        </div>
+    </div>
+
+{% comment %} 
+    <div class="fixed bottom-4 right-4 bg-white p-2 rounded shadow-lg z-50 text-xs">
+        <p>Status: <span x-text="$store.auth?.isAuthenticated ? 'Authenticated' : 'Not Authenticated'"></span></p>
+        <button @click="showLoginModal = true" class="bg-blue-500 text-white px-2 py-1 rounded mt-1">Login</button>
+    </div> {% endcomment %}
+
+    <!-- Add this script to your templates -->
+<script>
+    // For shared auth functionality across components
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('auth', {
+            token: localStorage.getItem('token') || null,
+            user: JSON.parse(localStorage.getItem('user') || 'null'),
+            isAuthenticated: false,
+
+            init() {
+                this.isAuthenticated = !!this.token;
+            },
+
+            async login(username, password) {
+                try {
+                    const response = await fetch('/api/token/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username, password }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Login failed');
+                    }
+
+                    const data = await response.json();
+                    
+                    // Store tokens
+                    localStorage.setItem('token', data.access);
+                    localStorage.setItem('refresh_token', data.refresh);
+                    
+                    // Get user info (optional)
+                    const userResponse = await fetch('/api/v1/users/me/', {
+                        headers: {
+                            'Authorization': `Bearer ${data.access}`
+                        }
+                    });
+                    
+                    if (userResponse.ok) {
+                        const userData = await userResponse.json();
+                        localStorage.setItem('user', JSON.stringify(userData));
+                        this.user = userData;
+                    }
+                    
+                    this.token = data.access;
+                    this.isAuthenticated = true;
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Login error:', error);
+                    return false;
+                }
+            },
+
+            logout() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('user');
+                this.token = null;
+                this.user = null;
+                this.isAuthenticated = false;
+            },
+
+            // Helper to get the authorization header for API requests
+            getAuthHeader() {
+                return this.token ? { 'Authorization': `Bearer ${this.token}` } : {};
+            },
+
+            // Function to handle token refresh
+            async refreshToken() {
+                const refreshToken = localStorage.getItem('refresh_token');
+                if (!refreshToken) {
+                    this.logout();
+                    return false;
+                }
+
+                try {
+                    const response = await fetch('/api/token/refresh/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ refresh: refreshToken }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Token refresh failed');
+                    }
+
+                    const data = await response.json();
+                    localStorage.setItem('token', data.access);
+                    this.token = data.access;
+                    return true;
+                } catch (error) {
+                    this.logout();
+                    return false;
+                }
+            }
+        });
+    });
+
+    // Add this to your script section
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize auth state from localStorage
+        if (Alpine.store('auth')) {
+            Alpine.store('auth').isAuthenticated = !!Alpine.store('auth').token;
+        }
+    });
+
+    // Login functionality in the form
+    function loginHandler() {
+        return {
+            errorMessage: '',
+            
+            async login() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const errorElem = document.getElementById('loginError');
+                
+                try {
+                    const auth = Alpine.store('auth');
+                    const success = await auth.login(username, password);
+                    
+                    if (success) {
+                        // Close modal and refresh page to update UI
+                        this.showLoginModal = false;
+                        window.location.reload();
+                    } else {
+                        errorElem.textContent = 'Invalid username or password';
+                        errorElem.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    errorElem.textContent = 'Login failed. Please try again.';
+                    errorElem.classList.remove('hidden');
+                }
+            }
+        };
+    }
+
+    // Add this to your main JavaScript
+    // Create a wrapper for fetch that handles token refresh
+    async function authenticatedFetch(url, options = {}) {
+        const auth = Alpine.store('auth');
+        if (!auth.isAuthenticated) {
+            return fetch(url, options);
+        }
+        
+        // Add authorization header
+        const authOptions = {
+            ...options,
+            headers: {
+                ...options.headers,
+                ...auth.getAuthHeader()
+            }
+        };
+        
+        // Try the request
+        let response = await fetch(url, authOptions);
+        
+        // If unauthorized, try to refresh token and retry
+        if (response.status === 401) {
+            const refreshed = await auth.refreshToken();
+            if (refreshed) {
+                // Update headers with new token
+                authOptions.headers = {
+                    ...authOptions.headers,
+                    ...auth.getAuthHeader()
+                };
+                // Retry request
+                response = await fetch(url, authOptions);
+            }
+        }
+        
+        return response;
+    }
+</script>
+</body>
+</html>

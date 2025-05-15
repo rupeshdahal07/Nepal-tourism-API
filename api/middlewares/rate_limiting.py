@@ -1,3 +1,8 @@
+from django.http import JsonResponse
+from django.core.cache import cache
+from django.utils import timezone
+from api.models import APIKey  # Assuming APIKey model is in api.models
+
 # Enhanced APIKey middleware for rate limiting
 class APIKeyMiddleware:
     def __init__(self, get_response):

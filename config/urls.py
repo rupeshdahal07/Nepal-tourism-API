@@ -5,7 +5,8 @@ from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from api.views import destinations_page, weather_page, home_page, trail_page, lodgings_page
+from api.views import destinations_page, weather_page, home_page, trail_page, lodgings_page, api_keys_view, generate_api_key, revoke_api_key
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -27,6 +28,11 @@ urlpatterns = [
     # Token URLs
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # API key URLs
+    path('api-keys/', api_keys_view, name='api_keys'),
+    path('api-keys/generate/', generate_api_key, name='generate_api_key'),
+    path('api-keys/revoke/<str:key>/', revoke_api_key, name='revoke_api_key'),
+    
     
     # Documentation URLs - these should come BEFORE other API patterns
     path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

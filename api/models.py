@@ -438,6 +438,11 @@ class PurposeStat(models.Model):
         return f"{self.purpose}: {self.count} ({self.percentage}%)"
 
 
+from django.contrib.auth import get_user_model
+import secrets
+
+User = get_user_model()
+
 class APIKey(TimestampedModel):
     """API keys for accessing restricted endpoints"""
     TIER_CHOICES = [
@@ -447,12 +452,18 @@ class APIKey(TimestampedModel):
     ]
     
     key = models.CharField(max_length=64, primary_key=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='api_keys', null=True)
     email = models.EmailField()
     organization = models.CharField(max_length=100, blank=True)
     tier = models.CharField(max_length=20, choices=TIER_CHOICES, default='free')
     is_active = models.BooleanField(default=True)
-    last_used = models.DateTimeField(null=True, blank=True)
+    last_used = models.DateTimeField(auto_now_add=True ,null=True, blank=True)
     
     def __str__(self):
         return f"API Key for {self.name} ({self.tier})"
+    
+    @classmethod
+    def generate_key(cls):
+        """Generate a secure random API key"""
+        return secrets.token_hex(32)  # 64 character hex string
