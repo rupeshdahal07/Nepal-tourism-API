@@ -126,7 +126,9 @@ USE_TZ = True
 # Add these settings after your STATIC_URL configuration
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [ BASE_DIR / 'static' ] 
+STATIC_ROOT = 'static_root'
+
 
 # Media files (Uploaded content)
 MEDIA_URL = '/media/'

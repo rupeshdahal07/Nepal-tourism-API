@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -209,12 +210,12 @@
                     <div class="animate-fade-in-down">
                         <span class="bg-nepal-blue/50 backdrop-blur-sm text-white text-sm md:text-base py-1 px-3 rounded-full inline-block mb-6 font-medium tracking-wider">Nepal's Premier Tourism Data Platform</span>
                         <h1 class="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 leading-tight tracking-tight">
-                            Nepal Tourism <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-nepal-red">API</span>
+                            Visit <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-nepal-red">Nepal </span>
                         </h1>
                     </div>
                     
                     <p class="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 animate-fade-in">
-                        Comprehensive data for Nepal's tourist destinations, trekking routes, 
+                        Welcome to the wonders of Nepal! Explore our vast collection of data on breathtaking destinations, unforgettable trekking routes, 
                         <span class="relative inline-block px-1">
                             <span class="relative z-10">weather conditions</span>
                             <span class="absolute bottom-1 left-0 w-full h-3 bg-nepal-red/30 -rotate-1"></span>
@@ -223,9 +224,9 @@
                     </p>
                     
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 animate-fade-in-up">
-                        <a href="/api/docs/" class="group bg-nepal-red hover:bg-red-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-xl hover:shadow-red-700/30 transform hover:-translate-y-1 w-full sm:w-auto">
+                        <a href="{% url "trail_page" %}" class="group bg-nepal-red hover:bg-red-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-xl hover:shadow-red-700/30 transform hover:-translate-y-1 w-full sm:w-auto">
                             <span class="flex items-center justify-center">
-                                API Documentation
+                                Trails Info
                                 <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                 </svg>
@@ -296,7 +297,7 @@
             <div class="md:col-span-8">
                 <div class="relative overflow-hidden rounded-2xl shadow-xl h-full bg-nepal-blue">
                     <div class="absolute inset-0 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1516382799247-87df95d790b7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80" 
+                        <img src="https://images.unsplash.com/photo-1605649487212-47bdab064df7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80" 
                              alt="Everest Base Camp Trek" 
                              class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700">
                         <div class="absolute inset-0 bg-gradient-to-t from-nepal-blue/90 via-nepal-blue/40 to-transparent"></div>
@@ -382,7 +383,7 @@
             <!-- Category 1 -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all">
                 <div class="h-48 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1544564789-b9ba7aeaf711?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                    <img src="{% static "media/soyambhu.png" %}" 
                          alt="Heritage Sites" 
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                 </div>
@@ -430,7 +431,7 @@
             <!-- Category 3 -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all">
                 <div class="h-48 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1606044034970-2398157a904f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                    <img src="{% static "media/local.png" %} " 
                          alt="Local Experiences" 
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                 </div>
