@@ -1,102 +1,13 @@
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nepal Tourism API - Lodging Options</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js for reactivity -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Custom Tailwind config -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        nepal: {
-                            red: '#DC143C',
-                            blue: '#003893'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body class="bg-gray-50 font-sans" x-data="{ mobileMenuOpen: false, searchFilter: '', typeFilter: 'all', placeFilter: '', priceRange: 15000, showFilters: false }">
-    <!-- Modern Navbar -->
-    <header class="bg-nepal-blue text-white sticky top-0 z-40">
-        <div class="container mx-auto px-4">
-            <!-- Top nav section with logo -->
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <a href="/" class="flex items-center space-x-2">
-                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M18 3L12 9L6 3H4V21H6V8L12 14L18 8V21H20V3H18Z" fill="currentColor"/>
-                    </svg>
-                    <span class="font-bold text-xl tracking-tight">Nepal Tourism</span>
-                </a>
-                
-                <!-- Mobile menu button -->
-                <div class="md:hidden">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="text-white hover:text-nepal-red focus:outline-none">
-                        <svg class="h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg class="h-6 w-6" x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                
-                <!-- Desktop nav links -->
-                <nav class="hidden md:flex md:items-center md:space-x-8">
-                    <a href="/" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Home</a>
-                    <a href="/destinations" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Destinations</a>
-                    <a href="/weather" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Weather</a>
-                    <a href="{% url 'trail_page' %}" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Trails</a>
-                    <a href="/lodgings" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 border-b-2 border-nepal-red pb-1">Lodging</a>
-                    <div class="relative group">
-                        <button class="flex items-center hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">
-                            Info
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">About Nepal</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Travel Guide</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">FAQ</a>
-                        </div>
-                    </div>
-                    <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">API Docs</a>
-                </nav>
-            </div>
-            
-            <!-- Mobile nav links -->
-            <div class="md:hidden transition-all duration-300 ease-in-out max-h-0 overflow-hidden" :class="{'max-h-96': mobileMenuOpen, 'max-h-0': !mobileMenuOpen}">
-                <nav class="flex flex-col space-y-3 pb-3">
-                    <a href="/" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Home</a>
-                    <a href="/destinations" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Destinations</a>
-                    <a href="/weather" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Weather</a>
-                    <a href="{% url 'trail_page' %}" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Trails</a>
-                    <a href="/lodgings" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Lodging</a>
-                    <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">About Nepal</a>
-                    <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Travel Guide</a>
-                    <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm inline-block w-fit">API Docs</a>
-                </nav>
-            </div>
-        </div>
-    </header>
+{% block title %}Lodging Options - NepSnap{% endblock %}
 
+{% block extra_css %}
+<!-- Any additional CSS specific to lodgings page -->
+{% endblock %}
+
+{% block content %}
+<div x-data="lodgingData()">
     <!-- Page Header -->
     <div class="bg-gray-800 py-12 relative overflow-hidden">
         <div class="absolute inset-0 z-0">
@@ -176,7 +87,7 @@
 
     <!-- Lodging List -->
     <div class="container mx-auto px-4 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" x-data="lodgingData()">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- Lodging Card - Will be populated by API -->
             <template x-for="lodging in filteredLodgings" :key="lodging.id">
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -280,141 +191,87 @@
             </template>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <!-- Footer -->
-    <footer class="bg-nepal-blue text-white mt-12">
-        <div class="container mx-auto px-4 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <h3 class="text-xl font-bold mb-4">Nepal Tourism API</h3>
-                    <p class="text-gray-300">Comprehensive data on Nepal's tourist destinations, weather, trails, and more.</p>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">API Resources</h4>
-                    <ul class="space-y-2">
-                        <li><a href="/api/docs/" class="text-gray-300 hover:text-white">API Documentation</a></li>
-                        <li><a href="/api/redoc/" class="text-gray-300 hover:text-white">ReDoc Documentation</a></li>
-                        <li><a href="/api/v1/" class="text-gray-300 hover:text-white">API Endpoints</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Categories</h4>
-                    <ul class="space-y-2">
-                        <li><a href="/destinations" class="text-gray-300 hover:text-white">Destinations</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white">Trekking Routes</a></li>
-                        <li><a href="/weather" class="text-gray-300 hover:text-white">Weather Data</a></li>
-                        <li><a href="/lodgings" class="text-gray-300 hover:text-white">Lodging Options</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
-                    <p class="text-gray-300">info@nepaltourismapi.com</p>
-                    <p class="text-gray-300">+977 1 XXXX XXX</p>
-                    <div class="mt-4 flex space-x-4">
-                        <a href="#" class="text-gray-300 hover:text-white">
-                            <span class="sr-only">Twitter</span>
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-white">
-                            <span class="sr-only">GitHub</span>
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-12 pt-8 border-t border-white/20 text-center">
-                <p class="text-gray-300">&copy; 2025 Nepal Tourism API. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Alpine.js Script for Data Fetching and Filtering -->
-    <script>
-        function lodgingData() {
-            return {
-                lodgings: [],
-                loading: true,
-                
-                // Initialize data
-                init() {
-                    this.fetchLodgings();
-                },
-                
-                // Fetch lodgings from API
-                async fetchLodgings() {
-                    try {
-                        const response = await fetch('/api/v1/lodgings/');
-                        const data = await response.json();
-                        this.lodgings = data;
-                        this.loading = false;
-                    } catch (error) {
-                        console.error('Error fetching lodging data:', error);
-                        this.loading = false;
-                    }
-                },
-                
-                // Format price with comma separators
-                formatPrice(price) {
-                    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                },
-                
-                // Get readable lodging type label
-                getLodgingTypeLabel(type) {
-                    const types = {
-                        'hotel': 'Hotel',
-                        'guesthouse': 'Guesthouse',
-                        'teahouse': 'Teahouse',
-                        'lodge': 'Lodge'
-                    };
-                    return types[type] || type;
-                },
-                
-                // Reset all filters
-                resetFilters() {
-                    document.querySelector('input[x-model="searchFilter"]').value = '';
-                    document.querySelector('select[x-model="typeFilter"]').value = 'all';
-                    document.querySelector('input[x-model="placeFilter"]').value = '';
-                    document.querySelector('input[x-model="priceRange"]').value = 15000;
-                    
-                    // Update Alpine.js models
-                    Alpine.evaluate(document.querySelector('body'), 'searchFilter = ""');
-                    Alpine.evaluate(document.querySelector('body'), 'typeFilter = "all"');
-                    Alpine.evaluate(document.querySelector('body'), 'placeFilter = ""');
-                    Alpine.evaluate(document.querySelector('body'), 'priceRange = 15000');
-                },
-                
-                // Filtered lodgings based on user criteria
-                get filteredLodgings() {
-                    // Get filter values from Alpine.js scope
-                    const search = Alpine.evaluate(document.querySelector('body'), 'searchFilter').toLowerCase();
-                    const type = Alpine.evaluate(document.querySelector('body'), 'typeFilter');
-                    const place = Alpine.evaluate(document.querySelector('body'), 'placeFilter').toLowerCase();
-                    const maxPrice = parseInt(Alpine.evaluate(document.querySelector('body'), 'priceRange'));
-                    
-                    return this.lodgings.filter(lodging => {
-                        // Apply search filter
-                        const searchMatch = !search || 
-                            lodging.name.toLowerCase().includes(search) || 
-                            lodging.location.place.toLowerCase().includes(search);
-                            
-                        // Apply type filter
-                        const typeMatch = type === 'all' || lodging.type === type;
-                        
-                        // Apply location filter
-                        const placeMatch = !place || lodging.location.place.toLowerCase().includes(place);
-                        
-                        // Apply price filter
-                        const priceMatch = lodging.price_range.min <= maxPrice;
-                        
-                        return searchMatch && typeMatch && placeMatch && priceMatch;
-                    });
+{% block extra_js %}
+<!-- Alpine.js Script for Data Fetching and Filtering -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    function lodgingData() {
+        return {
+            lodgings: [],
+            loading: true,
+            searchFilter: '',
+            typeFilter: 'all',
+            placeFilter: '',
+            priceRange: 15000,
+            showFilters: false,
+            
+            // Initialize data
+            init() {
+                this.fetchLodgings();
+            },
+            
+            // Fetch lodgings from API
+            async fetchLodgings() {
+                try {
+                    const response = await fetch('/api/v1/lodgings/');
+                    const data = await response.json();
+                    this.lodgings = data;
+                    this.loading = false;
+                } catch (error) {
+                    console.error('Error fetching lodging data:', error);
+                    this.loading = false;
                 }
-            };
-        }
-    </script>
-</body>
-</html>
+            },
+            
+            // Format price with comma separators
+            formatPrice(price) {
+                return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            },
+            
+            // Get readable lodging type label
+            getLodgingTypeLabel(type) {
+                const types = {
+                    'hotel': 'Hotel',
+                    'guesthouse': 'Guesthouse',
+                    'teahouse': 'Teahouse',
+                    'lodge': 'Lodge'
+                };
+                return types[type] || type;
+            },
+            
+            // Reset all filters
+            resetFilters() {
+                this.searchFilter = '';
+                this.typeFilter = 'all';
+                this.placeFilter = '';
+                this.priceRange = 15000;
+            },
+            
+            // Filtered lodgings based on user criteria
+            get filteredLodgings() {
+                return this.lodgings.filter(lodging => {
+                    // Apply search filter
+                    const searchMatch = !this.searchFilter || 
+                        lodging.name.toLowerCase().includes(this.searchFilter.toLowerCase()) || 
+                        lodging.location.place.toLowerCase().includes(this.searchFilter.toLowerCase());
+                        
+                    // Apply type filter
+                    const typeMatch = this.typeFilter === 'all' || lodging.type === this.typeFilter;
+                    
+                    // Apply location filter
+                    const placeMatch = !this.placeFilter || 
+                        lodging.location.place.toLowerCase().includes(this.placeFilter.toLowerCase());
+                    
+                    // Apply price filter
+                    const priceMatch = lodging.price_range.min <= this.priceRange;
+                    
+                    return searchMatch && typeMatch && placeMatch && priceMatch;
+                });
+            }
+        };
+    }
+</script>
+{% endblock %}

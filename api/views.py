@@ -14,12 +14,32 @@ from .serializers.serializers import (
     DestinationSerializer, LodgingSerializer, GuideSerializer, 
     AgencySerializer, PermitSerializer, EventSerializer, 
     TrailStatusSerializer, WeatherDataSerializer, WeatherForecastSerializer,
-    TourismStatSerializer
+    TourismStatSerializer, UserRegistrationSerializer, UserProfileSerializer
 )
 from .services.weather import WeatherService
 from api.services.trail_status import TrailStatusService
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+
+
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
+from django.conf import settings
+from rest_framework_simplejwt.tokens import AccessToken
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.http import Http404
 
 class CachedReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     """Base ViewSet with caching for list and retrieve actions"""
@@ -101,13 +121,151 @@ def home_page(request):
 def destinations_page(request):
     return render(request, 'destinations.html')
 # Add this function to serve the weather template
+
 def weather_page(request):
     return render(request, 'weather.html')
+
 def trail_page(request):
     return render(request, 'trails.html')
+
 def lodgings_page(request):
     return render(request, 'lodgings.html')
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_user(request):
+    """Register a new user."""
+    serializer = UserRegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    """Get or update user profile."""
+    user = request.user
+    
+    if request.method == 'GET':
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data)
+        
+    elif request.method == 'PATCH':
+        serializer = UserProfileSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    """Change user password."""
+    user = request.user
+    
+    # Validate old password
+    current_password = request.data.get('current_password')
+    if not authenticate(username=user.username, password=current_password):
+        return Response({'detail': 'Current password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Set new password
+    new_password = request.data.get('new_password')
+    if not new_password:
+        return Response({'detail': 'New password is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    # Validate and set new password
+    try:
+        user.set_password(new_password)
+        user.save()
+        return Response({'detail': 'Password changed successfully'})
+    except Exception as e:
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset(request):
+    """Send password reset email."""
+    email = request.data.get('email')
+    if not email:
+        return Response({'detail': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        # Don't reveal that the user doesn't exist
+        return Response({'detail': 'Password reset email sent if email exists'})
+        
+    # Generate token and URL
+    token = default_token_generator.make_token(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    reset_url = f"{request.build_absolute_uri('/').rstrip('/')}/reset-password/{uid}/{token}/"
+    
+    # Send email
+    send_mail(
+        'Reset your password',
+        f'Click the following link to reset your password: {reset_url}',
+        settings.DEFAULT_FROM_EMAIL,
+        [email],
+        fail_silently=False,
+    )
+    
+    return Response({'detail': 'Password reset email sent if email exists'})
+
+@require_POST
+def login_complete(request):
+    """Handle JWT login completion and create session"""
+    token = request.POST.get('token')
+    next_url = request.POST.get('next', '/')
+    
+    if not token:
+        messages.error(request, "No authentication token provided")
+        return redirect('/?show_login=true')
+    
+    try:
+        # Validate the token and get the user
+        access_token = AccessToken(token)
+        user_id = access_token['user_id']
+        user = User.objects.get(id=user_id)
+        
+        # Log the user in with Django's session auth
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        
+        messages.success(request, f"Welcome, {user.username}!")
+        return redirect(next_url)
+        
+    except Exception as e:
+        messages.error(request, f"Authentication error: {str(e)}")
+        return redirect('/?show_login=true')
+    
+@require_POST
+def token_verify(request):
+    """Verify token and redirect to requested page"""
+    token = request.POST.get('token')
+    redirect_to = request.POST.get('redirect_to', '/')
+    
+    if not token:
+        messages.error(request, "No authentication token provided")
+        return redirect('/?show_login=true')
+    
+    try:
+        # Validate the token and get the user
+        access_token = AccessToken(token)
+        user_id = access_token['user_id']
+        user = User.objects.get(id=user_id)
+        
+        # Log the user in with Django's session auth
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        
+        return redirect(redirect_to)
+        
+    except Exception as e:
+        messages.error(request, f"Authentication error: {str(e)}")
+        return redirect('/?show_login=true')
 
 class DestinationViewSet(CachedReadOnlyModelViewSet):
     """
@@ -375,9 +533,10 @@ from django.contrib import messages
 from django.http import Http404
 from .models import APIKey
 
-@login_required
+@login_required(login_url='/?show_login=true')
 def api_keys_view(request):
     """View for displaying and managing API keys"""
+    # Get API keys for the current user
     api_keys = APIKey.objects.filter(user=request.user, is_active=True).order_by('-created_at')
     
     context = {

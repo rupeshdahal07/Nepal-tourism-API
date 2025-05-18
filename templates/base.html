@@ -1,9 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nepal Tourism API - Comprehensive Data for Nepal's Tourist Destinations</title>
+    <title>{% block title %}Nepal Tourism API{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js for reactivity -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -60,8 +61,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-gray-50 font-sans" x-data="{ mobileMenuOpen: false, showLoginModal: false }">
+<body class="bg-gray-50 font-sans" x-data="{ mobileMenuOpen: false, showLoginModal: {% if show_login %}true{% else %}false{% endif %} }">
     <!-- Modern Navbar -->
     <header class="bg-nepal-blue text-white sticky top-0 z-40">
         <div class="container mx-auto px-4">
@@ -69,10 +71,8 @@
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
                 <a href="/" class="flex items-center space-x-2">
-                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M18 3L12 9L6 3H4V21H6V8L12 14L18 8V21H20V3H18Z" fill="currentColor"/>
-                    </svg>
-                    <span class="font-bold text-xl tracking-tight">Nepal Tourism</span>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Flag_of_Nepal.svg" alt="NepSnap Logo" class="h-6 w-auto">
+                    <span class="font-bold text-xl tracking-tight">NepSnap</span>
                 </a>
                 
                 <!-- Mobile menu button -->
@@ -89,11 +89,11 @@
                 
                 <!-- Desktop nav links -->
                 <nav class="hidden md:flex md:items-center md:space-x-8">
-                    <a href="/" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 border-b-2 border-nepal-red pb-1">Home</a>
-                    <a href="/destinations" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Destinations</a>
-                    <a href="/weather" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Weather</a>
-                    <a href="{% url "trail_page" %}" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Trails</a>
-                    <a href="{% url "lodgings_page" %}" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">Lodging</a>
+                    <a href="/" class="{% if request.path == '/' %}text-nepal-red border-b-2 border-nepal-red pb-1{% else %}hover:text-nepal-red{% endif %} font-medium text-sm uppercase tracking-wider transition-colors duration-200">Home</a>
+                    <a href="/destinations" class="{% if 'destinations' in request.path %}text-nepal-red border-b-2 border-nepal-red pb-1{% else %}hover:text-nepal-red{% endif %} font-medium text-sm uppercase tracking-wider transition-colors duration-200">Destinations</a>
+                    <a href="/weather" class="{% if 'weather' in request.path %}text-nepal-red border-b-2 border-nepal-red pb-1{% else %}hover:text-nepal-red{% endif %} font-medium text-sm uppercase tracking-wider transition-colors duration-200">Weather</a>
+                    <a href="{% url 'trail_page' %}" class="{% if 'trails' in request.path %}text-nepal-red border-b-2 border-nepal-red pb-1{% else %}hover:text-nepal-red{% endif %} font-medium text-sm uppercase tracking-wider transition-colors duration-200">Trails</a>
+                    <a href="{% url 'lodgings_page' %}" class="{% if 'lodgings' in request.path %}text-nepal-red border-b-2 border-nepal-red pb-1{% else %}hover:text-nepal-red{% endif %} font-medium text-sm uppercase tracking-wider transition-colors duration-200">Lodging</a>
                     <div class="relative group">
                         <button class="flex items-center hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200">
                             Info
@@ -107,17 +107,45 @@
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">FAQ</a>
                         </div>
                     </div>
-                    <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">API Docs</a>
 
-                    <!-- Add this after the API Docs link in your desktop nav -->
+                   <div class="relative group" x-data="{ dropdownOpen: false }">
+                        <button 
+                            @click="dropdownOpen = !dropdownOpen" 
+                            @click.away="dropdownOpen = false"
+                            class="flex items-center bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">
+                            API Access
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div 
+                            x-show="dropdownOpen" 
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="/api/docs/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-nepal-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    API Documentation
+                                </div>
+                            </a>
+                            <a href="{% url 'api_keys' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-nepal-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                                    </svg>
+                                    API Keys
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- User authentication -->
                     <div class="relative ml-3">
-                        <!-- Show login button when not authenticated -->
                         <template x-if="!$store.auth.isAuthenticated">
-                            <button @click="showLoginModal = true" class="bg-white text-nepal-blue hover:bg-gray-100 font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm">
+                            <button @click="showLoginModal = true" class="bg-white text-nepal-blue hover:bg-gray-100 px-4 py-2 rounded-full text-sm font-medium">
                                 Login
                             </button>
                         </template>
-                        
                         <!-- Show user menu when authenticated -->
                         <template x-if="$store.auth.isAuthenticated">
                             <div x-data="{ userMenuOpen: false }" class="relative">
@@ -132,30 +160,68 @@
                                     class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50"
                                     x-cloak>
                                     <span x-text="$store.auth.user?.username || 'User'" class="block px-4 py-2 text-sm text-gray-700 font-medium border-b"></span>
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                    <a href="#" @click.prevent="openProfileModal()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                            Your Profile
+                                        </div>
+                                    </a>
+                                    <a href="#" 
+                                    @click.prevent="handleApiKeysClick()" 
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 mr-2 text-nepal-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                                                </svg>
+                                                API Keys
+                                            </div>
+                                    </a>
                                     <a href="#" @click.prevent="$store.auth.logout(); window.location.reload();" 
-                                    class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Sign out</a>
+                                    class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                            </svg>
+                                            Sign out
+                                        </div>
+                                    </a>
                                 </div>
                             </div>
                         </template>
                     </div>
-                    
                 </nav>
             </div>
             
             <!-- Mobile nav links -->
-            <div class="md:hidden transition-all duration-300 ease-in-out max-h-0 overflow-hidden" :class="{'max-h-96': mobileMenuOpen, 'max-h-0': !mobileMenuOpen}">
+            <div class="md:hidden transition-all duration-300 ease-in-out max-h-0 overflow-hidden" :class="{'max-h-auto': mobileMenuOpen, 'max-h-0': !mobileMenuOpen}">
                 <nav class="flex flex-col space-y-3 pb-3">
-                    <a href="/" class="text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Home</a>
-                    <a href="/destinations" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Destinations</a>
-                    <a href="/weather" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Weather</a>
-                    <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Trails</a>
+                    <a href="/" class="{% if request.path == '/' %}text-nepal-red{% else %}hover:text-nepal-red{% endif %} font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Home</a>
+                    <a href="/destinations" class="{% if 'destinations' in request.path %}text-nepal-red{% else %}hover:text-nepal-red{% endif %} font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Destinations</a>
+                    <a href="/weather" class="{% if 'weather' in request.path %}text-nepal-red{% else %}hover:text-nepal-red{% endif %} font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Weather</a>
+                    <a href="{% url 'trail_page' %}" class="{% if 'trails' in request.path %}text-nepal-red{% else %}hover:text-nepal-red{% endif %} font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Trails</a>
+                    <a href="{% url 'lodgings_page' %}" class="{% if 'lodgings' in request.path %}text-nepal-red{% else %}hover:text-nepal-red{% endif %} font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Lodging</a>
                     <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">About Nepal</a>
                     <a href="#" class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">Travel Guide</a>
-                    <a href="/api/docs/" class="bg-nepal-red hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm inline-block w-fit">API Docs</a>
-
-                    <!-- Add this to your mobile nav section -->
+                    <div class="py-2">
+                        <span class="font-medium text-sm uppercase tracking-wider text-nepal-red">API Access</span>
+                        <div class="pl-4 mt-2 space-y-2">
+                            <a href="/api/docs/" class="hover:text-nepal-red font-medium text-sm transition-colors duration-200 flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                API Documentation
+                            </a>
+                            <a href="{% url 'api_keys' %}" class="hover:text-nepal-red font-medium text-sm transition-colors duration-200 flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                                </svg>
+                                API Keys
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Mobile auth options -->
                     <template x-if="!$store.auth.isAuthenticated">
                         <a @click.prevent="showLoginModal = true" href="#" 
                         class="hover:text-nepal-red font-medium text-sm uppercase tracking-wider transition-colors duration-200 py-2">
@@ -175,16 +241,15 @@
                     </template>
                 </nav>
             </div>
-            
         </div>
     </header>
 
     <!-- Main content -->
-  
-        {% block content %}
-        {% endblock %}
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 
-   <!-- Footer -->
+    <!-- Footer -->
     <footer class="bg-nepal-blue text-white">
         <div class="container mx-auto px-4 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -204,9 +269,9 @@
                     <h4 class="text-lg font-semibold mb-4">Categories</h4>
                     <ul class="space-y-2">
                         <li><a href="/destinations" class="text-gray-300 hover:text-white">Destinations</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white">Trekking Routes</a></li>
+                        <li><a href="{% url 'trail_page' %}" class="text-gray-300 hover:text-white">Trekking Routes</a></li>
                         <li><a href="/weather" class="text-gray-300 hover:text-white">Weather Data</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white">Lodging Options</a></li>
+                        <li><a href="{% url 'lodgings_page' %}" class="text-gray-300 hover:text-white">Lodging Options</a></li>
                     </ul>
                 </div>
                 <div>
@@ -235,8 +300,8 @@
         </div>
     </footer>
 
-<!--login form -->
-    <div x-show="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" x-cloak>
+    <!-- Login Modal -->
+    <div x-show="showLoginModal" @keydown.escape.window="showLoginModal = false" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" x-cloak>
         <div @click.away="showLoginModal = false" class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-gray-900">Login</h3>
@@ -247,213 +312,1146 @@
                 </button>
             </div>
             
-            <form id="loginForm" x-data="loginHandler()" @submit.prevent="login">
-                <div class="mb-4">
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                    <input type="text" id="username" name="username" required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
-                </div>
-                
-                <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="password" name="password" required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
-                </div>
-                
-                <div class="flex items-center justify-between">
-                    <button type="submit" class="w-full bg-nepal-blue text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue">
-                        Sign In
-                    </button>
-                </div>
-                
-                <div id="loginError" class="mt-3 text-red-600 text-sm hidden"></div>
-            </form>
+            <div x-data="authHandler()" x-show="!showRegisterForm && !showResetForm">
+                <form @submit.prevent="login">
+                    {% csrf_token %}
+                    <input type="hidden" id="next" name="next" value="{{ next }}">
+                    <div class="mb-4">
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="username" name="username" required 
+                            x-model="loginForm.username"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="password" name="password" required 
+                            x-model="loginForm.password"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                        <div class="flex justify-end mt-1">
+                            <button type="button" @click="showResetForm = true" class="text-sm text-nepal-blue hover:text-blue-700">
+                                Forgot password?
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <button type="submit" class="w-full bg-nepal-blue text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue"
+                            :disabled="loading" x-bind:class="{'opacity-75 cursor-not-allowed': loading}">
+                            <span x-show="!loading">Sign In</span>
+                            <span x-show="loading" class="flex items-center justify-center">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Signing In...
+                            </span>
+                        </button>
+                    </div>
+                    
+                    <div x-show="errorMessage" x-text="errorMessage" class="mt-3 text-red-600 text-sm"></div>
+
+                    <div class="mt-6 text-center">
+                        <p class="text-sm text-gray-600">
+                            Don't have an account?
+                            <button type="button" @click="showRegisterForm = true" class="text-nepal-blue hover:text-blue-700 font-medium">
+                                Register now
+                            </button>
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Registration Form -->
+            <div x-show="showRegisterForm" x-cloak>
+                <form @submit.prevent="register">
+                    <div class="mb-4">
+                        <label for="reg-username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="reg-username" required 
+                            x-model="registerForm.username"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="email" required 
+                            x-model="registerForm.email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="reg-password" required 
+                            x-model="registerForm.password"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <input type="password" id="confirm-password" required 
+                            x-model="registerForm.confirmPassword"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button type="submit" class="w-full bg-nepal-blue text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue"
+                            :disabled="loading" x-bind:class="{'opacity-75 cursor-not-allowed': loading}">
+                            <span x-show="!loading">Register</span>
+                            <span x-show="loading" class="flex items-center justify-center">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Registering...
+                            </span>
+                        </button>
+                    </div>
+                    
+                    <div x-show="errorMessage" x-text="errorMessage" class="mt-3 text-red-600 text-sm"></div>
+                    
+                    <div class="mt-6 text-center">
+                        <p class="text-sm text-gray-600">
+                            Already have an account?
+                            <button type="button" @click="showRegisterForm = false" class="text-nepal-blue hover:text-blue-700 font-medium">
+                                Login instead
+                            </button>
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Password Reset Form -->
+            <div x-show="showResetForm" x-cloak>
+                <form @submit.prevent="resetPassword">
+                    <div class="mb-4">
+                        <label for="reset-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="reset-email" required 
+                            x-model="resetForm.email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <button type="submit" class="w-full bg-nepal-blue text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue"
+                            :disabled="loading" x-bind:class="{'opacity-75 cursor-not-allowed': loading}">
+                            <span x-show="!loading">Reset Password</span>
+                            <span x-show="loading" class="flex items-center justify-center">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Sending...
+                            </span>
+                        </button>
+                    </div>
+                    
+                    <div x-show="successMessage" x-text="successMessage" class="mt-3 text-green-600 text-sm"></div>
+                    <div x-show="errorMessage" x-text="errorMessage" class="mt-3 text-red-600 text-sm"></div>
+                    
+                    <div class="mt-6 text-center">
+                        <button type="button" @click="showResetForm = false" class="text-nepal-blue hover:text-blue-700 font-medium">
+                            Back to login
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-{% comment %} 
-    <div class="fixed bottom-4 right-4 bg-white p-2 rounded shadow-lg z-50 text-xs">
-        <p>Status: <span x-text="$store.auth?.isAuthenticated ? 'Authenticated' : 'Not Authenticated'"></span></p>
-        <button @click="showLoginModal = true" class="bg-blue-500 text-white px-2 py-1 rounded mt-1">Login</button>
-    </div> {% endcomment %}
+    <!-- User Profile Modal -->
+    <div x-data="profileHandler()" x-show="showProfileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" x-cloak>
+        <div @click.away="closeProfileModal()" class="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">My Profile</h3>
+                <button @click="closeProfileModal()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Left Column: User Info -->
+                <div class="md:col-span-1">
+                    <div class="bg-gray-100 rounded-lg p-6 text-center">
+                        <div class="w-24 h-24 bg-nepal-blue rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
+                            <span x-text="getUserInitials()"></span>
+                        </div>
+                        
+                        <h4 class="text-xl font-bold mb-1" x-text="userProfile.username"></h4>
+                        <p class="text-gray-600 mb-4" x-text="userProfile.email"></p>
+                        
+                        <div class="text-sm text-gray-600">
+                            <p class="mb-1">Member since: <span x-text="formatDate(userProfile.date_joined)"></span></p>
+                            <p class="mb-1">API Calls: <span x-text="userProfile.api_usage?.total_calls || 0"></span></p>
+                            <p>Last Login: <span x-text="formatDate(userProfile.last_login)"></span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Profile Tabs -->
+                <div class="md:col-span-2">
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex" aria-label="Tabs">
+                            <button @click="activeTab = 'profile'"
+                                class="px-4 py-2 border-b-2 font-medium text-sm"
+                                :class="activeTab === 'profile' ? 'border-nepal-blue text-nepal-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'">
+                                Profile Settings
+                            </button>
+                            <button @click="activeTab = 'security'"
+                                class="px-4 py-2 border-b-2 font-medium text-sm ml-8"
+                                :class="activeTab === 'security' ? 'border-nepal-blue text-nepal-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'">
+                                Security
+                            </button>
+                            <button @click="activeTab = 'apikeys'"
+                                class="px-4 py-2 border-b-2 font-medium text-sm ml-8"
+                                :class="activeTab === 'apikeys' ? 'border-nepal-blue text-nepal-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'">
+                                API Keys
+                            </button>
+                        </nav>
+                    </div>
+                    
+                    <!-- Profile Settings Tab -->
+                    <div x-show="activeTab === 'profile'" class="py-4">
+                        <form @submit.prevent="updateProfile">
+                            <div class="mb-4">
+                                <label for="profile-username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                <input type="text" id="profile-username" 
+                                    x-model="userProfile.username"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="profile-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="profile-email" 
+                                    x-model="userProfile.email"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                <input type="text" id="first-name" 
+                                    x-model="userProfile.first_name"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="last-name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                <input type="text" id="last-name" 
+                                    x-model="userProfile.last_name"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                            </div>
+                            
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-nepal-blue text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue"
+                                    :disabled="loading">
+                                    <span x-show="!loading">Save Changes</span>
+                                    <span x-show="loading">Saving...</span>
+                                </button>
+                            </div>
+                            
+                            <div x-show="successMessage" x-text="successMessage" class="mt-3 text-green-600 text-sm"></div>
+                            <div x-show="errorMessage" x-text="errorMessage" class="mt-3 text-red-600 text-sm"></div>
+                        </form>
+                    </div>
+                    
+                    <!-- Security Tab -->
+                    <div x-show="activeTab === 'security'" class="py-4">
+                        <form @submit.prevent="changePassword">
+                            <div class="mb-4">
+                                <label for="current-password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                <input type="password" id="current-password" required
+                                    x-model="passwordForm.currentPassword"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="new-password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                <input type="password" id="new-password" required
+                                    x-model="passwordForm.newPassword"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label for="confirm-new-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                <input type="password" id="confirm-new-password" required
+                                    x-model="passwordForm.confirmPassword"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                            </div>
+                            
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-nepal-blue text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue"
+                                    :disabled="loading">
+                                    <span x-show="!loading">Change Password</span>
+                                    <span x-show="loading">Updating...</span>
+                                </button>
+                            </div>
+                            
+                            <div x-show="successMessage" x-text="successMessage" class="mt-3 text-green-600 text-sm"></div>
+                            <div x-show="errorMessage" x-text="errorMessage" class="mt-3 text-red-600 text-sm"></div>
+                        </form>
+                    </div>
+                    
+                    <!-- API Keys Tab -->
+                    <div x-show="activeTab === 'apikeys'" class="py-4">
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-yellow-700">
+                                        Never share your API keys publicly. Keys grant access to API resources on your behalf.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-md overflow-hidden mb-6">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key Name</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Used</th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <template x-for="key in apiKeys" :key="key.id">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap" x-text="key.name"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="formatDate(key.created)"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="key.last_used ? formatDate(key.last_used) : 'Never'"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button @click="confirmDeleteKey(key.id)" class="text-red-600 hover:text-red-900">Delete</button>
+                                                <button @click="viewKey(key.id)" class="ml-3 text-nepal-blue hover:text-blue-900">View</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <tr x-show="apiKeys.length === 0">
+                                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                            No API keys created yet.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button @click="showNewKeyForm = true" class="bg-nepal-blue text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue">
+                                Generate New API Key
+                            </button>
+                        </div>
+                        
+                        <!-- New Key Form -->
+                        <div x-show="showNewKeyForm" class="mt-6 bg-gray-50 border border-gray-200 rounded-md p-4">
+                            <h4 class="text-lg font-medium mb-4">Create New API Key</h4>
+                            <form @submit.prevent="createNewApiKey">
+                                <div class="mb-4">
+                                    <label for="key-name" class="block text-sm font-medium text-gray-700 mb-1">Key Name</label>
+                                    <input type="text" id="key-name" required
+                                        x-model="newKeyForm.name" placeholder="e.g., Development, Production"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nepal-blue focus:border-nepal-blue">
+                                </div>
+                                
+                                <div class="flex justify-end space-x-3">
+                                    <button type="button" @click="showNewKeyForm = false" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="bg-nepal-blue text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nepal-blue"
+                                        :disabled="loading">
+                                        <span x-show="!loading">Create Key</span>
+                                        <span x-show="loading">Creating...</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Key View Dialog -->
+                        <div x-show="showKeyDetails" class="mt-6 bg-green-50 border border-green-200 rounded-md p-4">
+                            <div class="flex justify-between items-start mb-4">
+                                <h4 class="text-lg font-medium text-green-800">API Key Created</h4>
+                                <button @click="showKeyDetails = false" class="text-green-500 hover:text-green-700">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <p class="text-sm text-green-700 mb-2">Your API key has been created. Please copy it now as it won't be shown again.</p>
+                            
+                            <div class="bg-green-100 p-3 rounded-md mb-4">
+                                <div class="flex items-center">
+                                    <code x-text="newKeyValue" class="flex-1 font-mono text-green-900"></code>
+                                    <button @click="copyToClipboard(newKeyValue)" class="ml-2 text-green-700 hover:text-green-900">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <p class="text-sm text-green-700">For security, this key will not be displayed again.</p>
+                        </div>
+                        
+                        <div x-show="successMessage" x-text="successMessage" class="mt-3 text-green-600 text-sm"></div>
+                        <div x-show="errorMessage" x-text="errorMessage" class="mt-3 text-red-600 text-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Add this script to your templates -->
-<script>
-    // For shared auth functionality across components
-    document.addEventListener('alpine:init', () => {
-        Alpine.store('auth', {
-            token: localStorage.getItem('token') || null,
-            user: JSON.parse(localStorage.getItem('user') || 'null'),
-            isAuthenticated: false,
+        <div class="bg-yellow-100 p-2 text-yellow-800 text-sm" x-show="$store.auth.isAuthenticated" x-cloak>
+        Authenticated as: <span x-text="$store.auth.user?.username"></span>
+        <span x-text="'Token: ' + ($store.auth.token ? '✓ Present' : '✗ Missing')"></span>
+    </div>
 
-            init() {
-                this.isAuthenticated = !!this.token;
-            },
+    <!-- Alpine.js Auth Store Script -->
+    <script>
+        // For shared auth functionality across components
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('auth', {
+                token: localStorage.getItem('token') || null,
+                user: JSON.parse(localStorage.getItem('user') || 'null'),
+                isAuthenticated: false,
+                tokenExpiry: null,
 
-            async login(username, password) {
-                try {
-                    const response = await fetch('/api/token/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ username, password }),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Login failed');
+                init() {
+                    this.isAuthenticated = !!this.token;
+                    
+                    // Set up token expiry check
+                    if (this.token) {
+                        this.tokenExpiry = this.getTokenExpiry(this.token);
+                        this.scheduleTokenRefresh();
                     }
+                },
 
-                    const data = await response.json();
+                getTokenExpiry(token) {
+                    try {
+                        // Get the payload part of the JWT (second part)
+                        const payload = token.split('.')[1];
+                        // Decode the base64
+                        const decoded = JSON.parse(atob(payload));
+                        // Get expiry timestamp
+                        return decoded.exp * 1000; // Convert to milliseconds
+                    } catch (e) {
+                        console.error('Error parsing token:', e);
+                        return null;
+                    }
+                },
+
+                scheduleTokenRefresh() {
+                    if (!this.tokenExpiry) return;
                     
-                    // Store tokens
-                    localStorage.setItem('token', data.access);
-                    localStorage.setItem('refresh_token', data.refresh);
+                    const now = Date.now();
+                    const timeUntilExpiry = this.tokenExpiry - now;
                     
-                    // Get user info (optional)
-                    const userResponse = await fetch('/api/v1/users/me/', {
-                        headers: {
-                            'Authorization': `Bearer ${data.access}`
+                    // If token is already expired, refresh now
+                    if (timeUntilExpiry <= 0) {
+                        this.refreshToken();
+                        return;
+                    }
+                    
+                    // Schedule refresh for 5 minutes before expiry
+                    const refreshTime = Math.max(0, timeUntilExpiry - (5 * 60 * 1000));
+                    console.log(`Token will be refreshed in ${Math.round(refreshTime/1000/60)} minutes`);
+                    
+                    setTimeout(() => {
+                        this.refreshToken();
+                    }, refreshTime);
+                },
+
+                async login(username, password) {
+                    try {
+                        console.log('Attempting login for:', username);
+                        
+                        const response = await fetch('/api/token/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value
+                            },
+                            body: JSON.stringify({ username, password }),
+                            credentials: 'include'
+                        });
+
+                        console.log('Login response status:', response.status);
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            console.error('Login error details:', errorData);
+                            throw new Error(errorData.detail || `Login failed: ${response.status}`);
                         }
-                    });
-                    
-                    if (userResponse.ok) {
-                        const userData = await userResponse.json();
-                        localStorage.setItem('user', JSON.stringify(userData));
-                        this.user = userData;
+
+                        const data = await response.json();
+                        
+                        // Store tokens
+                        localStorage.setItem('token', data.access);
+                        localStorage.setItem('refresh_token', data.refresh);
+                        
+                        // Set token expiry
+                        this.tokenExpiry = this.getTokenExpiry(data.access);
+                        this.scheduleTokenRefresh();
+                        
+                        // Get user info
+                        try {
+                            const userResponse = await fetch('/api/v1/users/me/', {
+                                headers: {
+                                    'Authorization': `Bearer ${data.access}`
+                                }
+                            });
+                            
+                            if (userResponse.ok) {
+                                const userData = await userResponse.json();
+                                localStorage.setItem('user', JSON.stringify(userData));
+                                this.user = userData;
+                            } else {
+                                console.warn('Could not fetch user data:', await userResponse.text());
+                            }
+                        } catch (error) {
+                            console.error('Error fetching user data:', error);
+                        }
+                        
+                        this.token = data.access;
+                        this.isAuthenticated = true;
+                        
+                        return true;
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        return false;
                     }
-                    
-                    this.token = data.access;
-                    this.isAuthenticated = true;
-                    
-                    return true;
-                } catch (error) {
-                    console.error('Login error:', error);
-                    return false;
-                }
-            },
+                },
 
-            logout() {
-                localStorage.removeItem('token');
-                localStorage.removeItem('refresh_token');
-                localStorage.removeItem('user');
-                this.token = null;
-                this.user = null;
-                this.isAuthenticated = false;
-            },
+                logout() {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('user');
+                    this.token = null;
+                    this.user = null;
+                    this.isAuthenticated = false;
+                    this.tokenExpiry = null;
+                },
 
-            // Helper to get the authorization header for API requests
-            getAuthHeader() {
-                return this.token ? { 'Authorization': `Bearer ${this.token}` } : {};
-            },
+                // Helper to get the authorization header for API requests
+                getAuthHeader() {
+                    return this.token ? { 'Authorization': `Bearer ${this.token}` } : {};
+                },
 
-            // Function to handle token refresh
-            async refreshToken() {
-                const refreshToken = localStorage.getItem('refresh_token');
-                if (!refreshToken) {
-                    this.logout();
-                    return false;
-                }
-
-                try {
-                    const response = await fetch('/api/token/refresh/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ refresh: refreshToken }),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Token refresh failed');
+                // Function to handle token refresh
+                async refreshToken() {
+                    const refreshToken = localStorage.getItem('refresh_token');
+                    if (!refreshToken) {
+                        this.logout();
+                        return false;
                     }
 
-                    const data = await response.json();
-                    localStorage.setItem('token', data.access);
-                    this.token = data.access;
-                    return true;
-                } catch (error) {
-                    this.logout();
-                    return false;
+                    try {
+                        console.log('Refreshing access token...');
+                        
+                        const response = await fetch('/api/token/refresh/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ refresh: refreshToken }),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Token refresh failed');
+                        }
+
+                        const data = await response.json();
+                        localStorage.setItem('token', data.access);
+                        this.token = data.access;
+                        
+                        // Update token expiry and schedule next refresh
+                        this.tokenExpiry = this.getTokenExpiry(data.access);
+                        this.scheduleTokenRefresh();
+                        
+                        console.log('Token refreshed successfully');
+                        return true;
+                    } catch (error) {
+                        console.error('Token refresh error:', error);
+                        this.logout();
+                        return false;
+                    }
                 }
+            });
+        });
+
+        // Initialize auth state from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            if (Alpine.store('auth')) {
+                Alpine.store('auth').isAuthenticated = !!Alpine.store('auth').token;
             }
         });
-    });
 
-    // Add this to your script section
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize auth state from localStorage
-        if (Alpine.store('auth')) {
-            Alpine.store('auth').isAuthenticated = !!Alpine.store('auth').token;
-        }
-    });
-
-    // Login functionality in the form
-    function loginHandler() {
-        return {
-            errorMessage: '',
-            
-            async login() {
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                const errorElem = document.getElementById('loginError');
+        // Login form handler
+        function authHandler() {
+            return {
+                showRegisterForm: false,
+                showResetForm: false,
+                loading: false,
+                errorMessage: '',
+                successMessage: '',
+                loginForm: {
+                    username: '',
+                    password: ''
+                },
+                registerForm: {
+                    username: '',
+                    email: '',
+                    password: '',
+                    confirmPassword: ''
+                },
+                resetForm: {
+                    email: ''
+                },
                 
-                try {
-                    const auth = Alpine.store('auth');
-                    const success = await auth.login(username, password);
+                async login() {
+                    if (this.loading) return;
                     
-                    if (success) {
-                        // Close modal and refresh page to update UI
-                        this.showLoginModal = false;
-                        window.location.reload();
-                    } else {
-                        errorElem.textContent = 'Invalid username or password';
-                        errorElem.classList.remove('hidden');
+                    this.loading = true;
+                    this.errorMessage = '';
+                    
+                    try {
+                        const auth = Alpine.store('auth');
+                        console.log('Attempting to login with username:', this.loginForm.username);
+                        
+                        const success = await auth.login(this.loginForm.username, this.loginForm.password);
+                        
+                        if (success) {
+                            console.log('Login successful, redirecting...');
+                            
+                            // Close modal first
+                            Alpine.evaluate(document.querySelector('body'), 'showLoginModal = false');
+                            
+                            // Create a form to post the token to the server and establish session auth
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '/login-complete/';  // Create this endpoint in your Django app
+                            
+                            // Add CSRF token
+                            const csrfInput = document.createElement('input');
+                            csrfInput.type = 'hidden';
+                            csrfInput.name = 'csrfmiddlewaretoken';
+                            csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                            form.appendChild(csrfInput);
+                            
+                            // Add token
+                            const tokenInput = document.createElement('input');
+                            tokenInput.type = 'hidden';
+                            tokenInput.name = 'token';
+                            tokenInput.value = auth.token;
+                            form.appendChild(tokenInput);
+                            
+                            // Add next URL
+                            const nextInput = document.createElement('input');
+                            nextInput.type = 'hidden';
+                            nextInput.name = 'next';
+                            nextInput.value = document.getElementById('next')?.value || '/';
+                            form.appendChild(nextInput);
+                            
+                            // Submit form
+                            document.body.appendChild(form);
+                            form.submit();
+                        } else {
+                            this.errorMessage = 'Invalid username or password';
+                        }
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        this.errorMessage = error.message || 'Login failed. Please try again.';
+                    } finally {
+                        this.loading = false;
                     }
-                } catch (error) {
-                    errorElem.textContent = 'Login failed. Please try again.';
-                    errorElem.classList.remove('hidden');
+                },
+                
+                async register() {
+                    if (this.loading) return;
+                    
+                    // Validate form
+                    if (this.registerForm.password !== this.registerForm.confirmPassword) {
+                        this.errorMessage = 'Passwords do not match';
+                        return;
+                    }
+                    
+                    this.loading = true;
+                    this.errorMessage = '';
+                    
+                    try {
+                        const response = await fetch('/api/v1/register/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                username: this.registerForm.username,
+                                email: this.registerForm.email,
+                                password: this.registerForm.password
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (!response.ok) {
+                            // Format error messages from API
+                            let errorMsg = 'Registration failed: ';
+                            if (typeof data === 'object') {
+                                Object.keys(data).forEach(key => {
+                                    errorMsg += `${key}: ${data[key].join(', ')} `;
+                                });
+                            } else {
+                                errorMsg += data;
+                            }
+                            throw new Error(errorMsg);
+                        }
+                        
+                        // Auto-login after registration
+                        const auth = Alpine.store('auth');
+                        await auth.login(this.registerForm.username, this.registerForm.password);
+                        
+                        // Close modal and reload page
+                        Alpine.evaluate(document.querySelector('body'), 'showLoginModal = false');
+                        window.location.reload();
+                        
+                    } catch (error) {
+                        console.error('Registration error:', error);
+                        this.errorMessage = error.message || 'Registration failed. Please try again.';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                async resetPassword() {
+                    if (this.loading) return;
+                    
+                    this.loading = true;
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                    
+                    try {
+                        const response = await fetch('/api/v1/password-reset/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: this.resetForm.email
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const data = await response.json();
+                            throw new Error(data.detail || 'Password reset failed');
+                        }
+                        
+                        this.successMessage = 'Password reset email sent. Please check your inbox.';
+                        this.resetForm.email = '';
+                        
+                        // Return to login form after 3 seconds
+                        setTimeout(() => {
+                            this.showResetForm = false;
+                            this.successMessage = '';
+                        }, 3000);
+                        
+                    } catch (error) {
+                        console.error('Password reset error:', error);
+                        this.errorMessage = error.message || 'Password reset failed. Please try again.';
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            };
+        }
+
+        function profileHandler() {
+            return {
+                showProfileModal: false,
+                activeTab: 'profile',
+                loading: false,
+                errorMessage: '',
+                successMessage: '',
+                userProfile: {
+                    username: '',
+                    email: '',
+                    first_name: '',
+                    last_name: '',
+                    date_joined: '',
+                    last_login: '',
+                    api_usage: { total_calls: 0 }
+                },
+                passwordForm: {
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                },
+                apiKeys: [],
+                showNewKeyForm: false,
+                showKeyDetails: false,
+                newKeyForm: { name: '' },
+                newKeyValue: '',
+                
+                init() {
+                    // Listen for profile modal open event
+                    window.addEventListener('open-profile-modal', () => {
+                        this.showProfileModal = true;
+                        this.loadUserProfile();
+                    });
+                },
+                
+                closeProfileModal() {
+                    this.showProfileModal = false;
+                    this.resetForms();
+                },
+                
+                resetForms() {
+                    this.activeTab = 'profile';
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                    this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
+                    this.newKeyForm = { name: '' };
+                    this.showNewKeyForm = false;
+                    this.showKeyDetails = false;
+                },
+                
+                async loadUserProfile() {
+                    this.loading = true;
+                    
+                    try {
+                        const response = await authenticatedFetch('/api/v1/users/me/');
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to load user profile');
+                        }
+                        
+                        const data = await response.json();
+                        this.userProfile = data;
+                        
+                        // Also load API keys
+                        this.loadApiKeys();
+                        
+                    } catch (error) {
+                        console.error('Error loading profile:', error);
+                        this.errorMessage = 'Failed to load profile information';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                async loadApiKeys() {
+                    try {
+                        const response = await authenticatedFetch('/api/v1/api-keys/');
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to load API keys');
+                        }
+                        
+                        const data = await response.json();
+                        this.apiKeys = Array.isArray(data) ? data : [];
+                        
+                    } catch (error) {
+                        console.error('Error loading API keys:', error);
+                    }
+                },
+                
+                async updateProfile() {
+                    if (this.loading) return;
+                    
+                    this.loading = true;
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                    
+                    try {
+                        const response = await authenticatedFetch('/api/v1/users/me/', {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                username: this.userProfile.username,
+                                email: this.userProfile.email,
+                                first_name: this.userProfile.first_name,
+                                last_name: this.userProfile.last_name
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const data = await response.json();
+                            let errorMsg = 'Update failed: ';
+                            if (typeof data === 'object') {
+                                Object.keys(data).forEach(key => {
+                                    errorMsg += `${key}: ${data[key].join(', ')} `;
+                                });
+                            }
+                            throw new Error(errorMsg);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        // Update user data in localStorage and Alpine store
+                        localStorage.setItem('user', JSON.stringify(data));
+                        Alpine.store('auth').user = data;
+                        
+                        this.successMessage = 'Profile updated successfully!';
+                        
+                    } catch (error) {
+                        console.error('Update profile error:', error);
+                        this.errorMessage = error.message || 'Failed to update profile';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                async changePassword() {
+                    if (this.loading) return;
+                    
+                    // Validate passwords match
+                    if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
+                        this.errorMessage = 'New passwords do not match';
+                        return;
+                    }
+                    
+                    this.loading = true;
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                    
+                    try {
+                        const response = await authenticatedFetch('/api/v1/change-password/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                current_password: this.passwordForm.currentPassword,
+                                new_password: this.passwordForm.newPassword
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const data = await response.json();
+                            throw new Error(data.detail || 'Failed to change password');
+                        }
+                        
+                        this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
+                        this.successMessage = 'Password changed successfully!';
+                        
+                    } catch (error) {
+                        console.error('Change password error:', error);
+                        this.errorMessage = error.message || 'Failed to change password';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                async createNewApiKey() {
+                    if (this.loading) return;
+                    
+                    this.loading = true;
+                    this.errorMessage = '';
+                    
+                    try {
+                        const response = await authenticatedFetch('/api/v1/api-keys/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: this.newKeyForm.name
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const data = await response.json();
+                            throw new Error(data.detail || 'Failed to create API key');
+                        }
+                        
+                        const data = await response.json();
+                        this.newKeyValue = data.key;
+                        
+                        // Refresh keys list
+                        await this.loadApiKeys();
+                        
+                        // Show key value
+                        this.showNewKeyForm = false;
+                        this.showKeyDetails = true;
+                        
+                    } catch (error) {
+                        console.error('Create API key error:', error);
+                        this.errorMessage = error.message || 'Failed to create API key';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                async confirmDeleteKey(keyId) {
+                    if (confirm('Are you sure you want to delete this API key? This action cannot be undone.')) {
+                        await this.deleteApiKey(keyId);
+                    }
+                },
+                
+                async deleteApiKey(keyId) {
+                    this.loading = true;
+                    this.errorMessage = '';
+                    
+                    try {
+                        const response = await authenticatedFetch(`/api/v1/api-keys/${keyId}/`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to delete API key');
+                        }
+                        
+                        // Refresh keys list
+                        await this.loadApiKeys();
+                        this.successMessage = 'API key deleted successfully';
+                        
+                        // Clear message after 3 seconds
+                        setTimeout(() => {
+                            this.successMessage = '';
+                        }, 3000);
+                        
+                    } catch (error) {
+                        console.error('Delete API key error:', error);
+                        this.errorMessage = error.message || 'Failed to delete API key';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                viewKey(keyId) {
+                    // This would show key details if available
+                    // For security, actual key values are never returned after creation
+                    alert('For security reasons, API keys can only be viewed once at creation time.');
+                },
+                
+                getUserInitials() {
+                    if (!this.userProfile) return '?';
+                    
+                    if (this.userProfile.first_name && this.userProfile.last_name) {
+                        return (this.userProfile.first_name[0] + this.userProfile.last_name[0]).toUpperCase();
+                    }
+                    
+                    return this.userProfile.username ? this.userProfile.username[0].toUpperCase() : '?';
+                },
+                
+                formatDate(dateString) {
+                    if (!dateString) return 'N/A';
+                    return new Date(dateString).toLocaleDateString();
+                },
+                
+                copyToClipboard(text) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('Copied to clipboard!');
+                    }).catch(err => {
+                        console.error('Failed to copy:', err);
+                    });
+                }
+            };
+        }
+
+        // Function to open the profile modal from anywhere
+        function openProfileModal() {
+            window.dispatchEvent(new CustomEvent('open-profile-modal'));
+            // Close the login modal if it's open
+             Alpine.evaluate(document.querySelector('body'), 'showLoginModal = false');
+        }
+        
+
+        // Authenticated fetch utility
+        async function authenticatedFetch(url, options = {}) {
+            const auth = Alpine.store('auth');
+            if (!auth.isAuthenticated) {
+                // Redirect to login if not authenticated
+                Alpine.evaluate(document.querySelector('body'), 'showLoginModal = true');
+                throw new Error('Not authenticated');
+            }
+            
+            // Add authorization header
+            const authOptions = {
+                ...options,
+                headers: {
+                    ...options.headers || {},
+                    'Authorization': `Bearer ${auth.token}`
+                }
+            };
+            
+            // Try the request
+            let response = await fetch(url, authOptions);
+            
+            // If unauthorized, try to refresh token and retry
+            if (response.status === 401) {
+                console.log('Token expired, attempting to refresh...');
+                const refreshed = await auth.refreshToken();
+                if (refreshed) {
+                    // Update headers with new token
+                    authOptions.headers = {
+                        ...authOptions.headers,
+                        'Authorization': `Bearer ${auth.token}`
+                    };
+                    // Retry request
+                    console.log('Token refreshed, retrying request');
+                    return fetch(url, authOptions);
+                } else {
+                    // Token refresh failed, redirect to login
+                    console.log('Token refresh failed, redirecting to login');
+                   
+                    auth.logout();
+                    Alpine.evaluate(document.querySelector('body'), 'showLoginModal = true');
+                    throw new Error('Authentication expired');
                 }
             }
-        };
+            
+            return response;
+        }
+
+        function handleApiKeysClick() {
+        const auth = Alpine.store('auth');
+        
+        if (!auth.isAuthenticated) {
+            // Show login modal if not authenticated
+            Alpine.evaluate(document.querySelector('body'), 'showLoginModal = true');
+            return;
+        }
+        
+        console.log('Creating API Keys access form...');
+        
+        // Create a form to post the token
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/token-verify/';  // Create this endpoint
+        
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        form.appendChild(csrfInput);
+        
+        // Add token
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = 'token';
+        tokenInput.value = auth.token;
+        form.appendChild(tokenInput);
+        
+        // Add redirect URL
+        const redirectInput = document.createElement('input');
+        redirectInput.type = 'hidden';
+        redirectInput.name = 'redirect_to';
+        redirectInput.value = '{% url "api_keys" %}';
+        form.appendChild(redirectInput);
+        
+        // Submit form
+        document.body.appendChild(form);
+        form.submit();
     }
 
-    // Add this to your main JavaScript
-    // Create a wrapper for fetch that handles token refresh
-    async function authenticatedFetch(url, options = {}) {
-        const auth = Alpine.store('auth');
-        if (!auth.isAuthenticated) {
-            return fetch(url, options);
-        }
-        
-        // Add authorization header
-        const authOptions = {
-            ...options,
-            headers: {
-                ...options.headers,
-                ...auth.getAuthHeader()
-            }
-        };
-        
-        // Try the request
-        let response = await fetch(url, authOptions);
-        
-        // If unauthorized, try to refresh token and retry
-        if (response.status === 401) {
-            const refreshed = await auth.refreshToken();
-            if (refreshed) {
-                // Update headers with new token
-                authOptions.headers = {
-                    ...authOptions.headers,
-                    ...auth.getAuthHeader()
-                };
-                // Retry request
-                response = await fetch(url, authOptions);
-            }
-        }
-        
-        return response;
-    }
-</script>
+    </script>
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

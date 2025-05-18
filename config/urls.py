@@ -5,8 +5,7 @@ from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from api.views import destinations_page, weather_page, home_page, trail_page, lodgings_page, api_keys_view, generate_api_key, revoke_api_key
-
+from api.views import destinations_page, weather_page, home_page, trail_page, lodgings_page, api_keys_view, generate_api_key, revoke_api_key, register_user, user_profile, change_password, password_reset, login_complete, token_verify
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -32,6 +31,14 @@ urlpatterns = [
     path('api-keys/', api_keys_view, name='api_keys'),
     path('api-keys/generate/', generate_api_key, name='generate_api_key'),
     path('api-keys/revoke/<str:key>/', revoke_api_key, name='revoke_api_key'),
+    
+    # Authentication endpoints
+    path('api/v1/register/', register_user, name='register'),
+    path('api/v1/users/me/', user_profile, name='user_profile'),
+    path('api/v1/change-password/', change_password, name='change_password'),
+    path('api/v1/password-reset/', password_reset, name='password_reset'),
+    path('login-complete/', login_complete, name='login_complete'),
+    path('token-verify/', token_verify, name='token_verify'),
     
     
     # Documentation URLs - these should come BEFORE other API patterns
